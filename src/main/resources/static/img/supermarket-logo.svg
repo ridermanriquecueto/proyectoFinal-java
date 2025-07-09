@@ -1,0 +1,17 @@
+<svg width="500" height="120" viewBox="0 0 500 120" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Logo Mi Supermercado Tech Online">
+  <!-- Carrito -->
+  <rect x="30" y="50" width="60" height="35" fill="#007bff" rx="6" ry="6"></rect>
+  <circle cx="40" cy="90" r="7" fill="#dc3545"></circle> <!-- Llanta roja -->
+  <circle cx="80" cy="90" r="7" fill="#dc3545"></circle> <!-- Llanta roja -->
+  <polyline points="30,50 50,25 95,25" fill="none" stroke="#007bff" stroke-width="4" stroke-linejoin="round"></polyline>
+
+  <!-- Texto principal arriba -->
+  <text x="110" y="55" font-family="Segoe UI, Tahoma, sans-serif" font-size="26" fill="#007bff" font-weight="bold">
+    Mi Supermercado Tech
+  </text>
+
+  <!-- Texto secundario abajo -->
+  <text x="110" y="85" font-family="Segoe UI, Tahoma, sans-serif" font-size="18" fill="#6c757d" font-style="italic">
+    Online
+  </text>
+</svg>

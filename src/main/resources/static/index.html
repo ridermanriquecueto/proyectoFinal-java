@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Gestión de Supermercado</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/main-menu.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<style>
+    /* Variables CSS (si no están en style.css) */
+:root {
+    --primary-color: #007bff; /* Azul vibrante */
+    --secondary-color: #6c757d; /* Gris para botones secundarios */
+    --success-color: #28a745; /* Verde para éxito/confirmación */
+    --danger-color: #dc3545; /* Rojo para eliminar/alerta */
+    --background-light: #f8f9fa; /* Fondo muy claro */
+    --text-color-dark: #343a40; /* Texto oscuro */
+    --card-shadow: 0 8px 20px rgba(0, 0, 0, 0.1); /* Sombra más pronunciada para la tarjeta principal */
+    --border-radius: 12px; /* Bordes más redondeados para la tarjeta principal */
+    --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+    font-family: var(--font-family);
+    margin: 0;
+    padding: 20px; /* Un poco de padding en el body */
+    background-color: var(--background-light);
+    color: var(--text-color-dark);
+    display: flex; /* Para centrar la tarjeta */
+    justify-content: center; /* Centrar horizontalmente */
+    align-items: center; /* Centrar verticalmente */
+    min-height: 100vh; /* Ocupar toda la altura de la ventana */
+}
+
+.container {
+    /* El container ahora solo actuará como un envoltorio flexible */
+    width: 100%;
+    max-width: 1000px; /* Ancho máximo para el container */
+}
+
+/* Estilos para la Main Card */
+.main-card {
+    background-color: white;
+    border-radius: var(--border-radius);
+    box-shadow: var(--card-shadow);
+    padding: 30px; /* Más padding interno */
+    text-align: center;
+    max-width: 800px; /* Ancho máximo de la tarjeta */
+    margin: 0 auto; /* Centrar la tarjeta dentro del container */
+    animation: fadeInScale 0.5s ease-out forwards; /* Animación de aparición */
+}
+
+@keyframes fadeInScale {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* Encabezado del supermercado dentro de la tarjeta */
+.supermarket-header {
+    margin-bottom: 25px;
+}
+
+.supermarket-logo {
+    max-width: 1000px; 
+    height: 600px;
+    height: auto;
+    margin-bottom: 15px;
+    display: block; 
+    margin-left: auto;
+    margin-right: auto;
+}
+.slogan {
+    font-size: 1.3rem; /* Quizás un poco más grande para compensar la ausencia del h1 */
+    color: var(--secondary-color);
+    margin-bottom: 20px;
+    font-style: italic;
+    font-weight: 500; /* Un poco más de peso si es necesario */
+}
+.main-title {
+    color: var(--primary-color);
+    font-size: 2.5rem; /* Título más grande */
+    margin-top: 0;
+    margin-bottom: 10px;
+    letter-spacing: 0.5px; /* Pequeño espaciado entre letras */
+}
+
+.slogan {
+    font-size: 1.1rem;
+    color: var(--secondary-color);
+    margin-bottom: 20px;
+    font-style: italic;
+}
+
+.divider {
+    border: none;
+    border-top: 1px solid #eee; /* Línea divisoria suave */
+    margin: 25px 0;
+}
+
+.menu-intro {
+    font-size: 1.2rem;
+    margin-bottom: 30px;
+    color: var(--text-color-dark);
+    font-weight: bold;
+}
+
+/* Grid del menú (mantener la mayoría de los estilos existentes de main-menu.css) */
+.main-menu-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.menu-item {
+    background-color: var(--background-light); /* Fondo más claro para los ítems del menú */
+    border: 1px solid #ddd;
+    border-radius: var(--border-radius);
+    padding: 20px 15px;
+    text-align: center;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05); /* Sombra más suave para los ítems individuales */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 1rem;
+    font-weight: bold;
+    color: var(--text-color-dark);
+}
+
+.menu-item:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+    background-color: #e9ecef; /* Ligero cambio de color al hover */
+    color: var(--primary-color); /* Color primario al hover */
+}
+
+.menu-item i {
+    font-size: 2.5rem;
+    color: var(--primary-color);
+    margin-bottom: 12px;
+}
+
+.menu-item:hover i {
+    color: #0056b3;
+}
+
+.exit-button {
+    background-color: var(--danger-color);
+    color: white;
+    border: none;
+}
+
+.exit-button i {
+    color: white;
+}
+
+.exit-button:hover {
+    background-color: #c82333;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+/* Mensajes (mantener existentes) */
+.message {
+    margin-top: 20px;
+    padding: 10px 15px;
+    border-radius: var(--border-radius);
+    font-weight: bold;
+    text-align: center;
+}
+.message.warning {
+    background-color: #fff3cd; /* Amarillo suave */
+    color: #856404; /* Naranja oscuro */
+    border: 1px solid #ffeeba;
+}
+.message.success {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+</style>
+<body>
+    <div class="container">
+        <div class="main-card">
+            <div class="supermarket-header">
+               <img src="img/supermarket-logo.svg" alt="Logo Supermercado" class="supermarket-logo">
+               
+                <p class="slogan">Tu mejor opción para compras frescas y rápidas.</p>
+            </div>
+            
+            <hr class="divider"> <p class="menu-intro">Selecciona la acción que deseas realizar:</p>
+
+            <div class="main-menu-grid">
+                <button class="menu-item" data-option="1">
+                    <i class="fas fa-box"></i>
+                    <span>Productos</span>
+                </button>
+                <button class="menu-item" data-option="cliente-catalogo" onclick="location.href='pages/catalogo.html'">
+                    <i class="fas fa-store"></i> <span>Ver Catálogo (Cliente)</span>
+                </button>
+                <button class="menu-item" data-option="2">
+                    <i class="fas fa-tags"></i>
+                    <span>Categorías</span>
+                </button>
+                <button class="menu-item" data-option="3">
+                    <i class="fas fa-shopping-cart"></i>
+                    <span>Carrito</span>
+                </button>
+                <button class="menu-item" data-option="4">
+                    <i class="fas fa-clipboard-list"></i>
+                    <span>Pedido</span>
+                </button>
+                <button class="menu-item" data-option="5">
+                    <i class="fas fa-history"></i>
+                    <span>Historial de Pedidos</span>
+                </button>
+                <button class="menu-item" data-option="6">
+                    <i class="fas fa-user-shield"></i>
+                    <span>Administración</span>
+                </button>
+                <button class="menu-item exit-button" data-option="7">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Salir</span>
+                </button>
+            </div>
+        </div>
+        <div id="message" class="message"></div>
+    </div>
+
+    <script src="js/script.js"></script>
+</body>
+</html>

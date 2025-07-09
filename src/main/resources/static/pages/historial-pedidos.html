@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Supermercado Online - Mi Historial de Pedidos</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* Variables CSS (Consistentes en todo el sitio) */
+        :root {
+            --primary-color: #007bff; /* Azul vibrante */
+            --secondary-color: #6c757d; /* Gris para botones secundarios / texto suave */
+            --tertiary-color: #f0ad4e; /* Naranja (para volver/otros usos si es necesario) */
+            --success-color: #28a745; /* Verde para éxito/confirmación */
+            --danger-color: #dc3545; /* Rojo para eliminar/alerta */
+            --background-light: #f8f9fa; /* Fondo muy claro */
+            --text-color-dark: #343a40; /* Texto oscuro principal */
+            --card-background: #ffffff; /* Fondo para tarjetas y modal */
+            --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); /* Sombra suave */
+            --border-radius: 8px;
+            --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            --spacing-unit: 15px; /* Unidad base para márgenes/paddings */
+            --border-color: #dee2e6; /* Color de borde para divisores */
+        }
+
+        body {
+            font-family: var(--font-family);
+            margin: 0;
+            padding: 0;
+            background-color: var(--background-light);
+            color: var(--text-color-dark);
+            line-height: 1.6;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* --- Header (Consistente) --- */
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 1rem 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+            position: sticky;
+            top: 0;
+            z-index: 999;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 1.8rem;
+        }
+
+        .header-links {
+            display: flex;
+            gap: 20px;
+        }
+
+        .header-links a {
+            color: white;
+            text-decoration: none;
+            font-size: 1rem;
+            font-weight: 500;
+            padding: 8px 12px;
+            border-radius: var(--border-radius);
+            transition: background-color 0.2s ease-in-out;
+        }
+
+        .header-links a:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+
+        /* --- Main Content de Historial de Pedidos --- */
+        main {
+            flex-grow: 1;
+            padding: 20px;
+            max-width: 900px;
+            margin: 20px auto;
+            background-color: var(--card-background);
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+        }
+
+        h2 {
+            text-align: center;
+            color: var(--primary-color);
+            margin-bottom: 30px;
+            font-size: 2rem;
+            border-bottom: 2px solid var(--primary-color);
+            display: inline-block;
+            padding-bottom: 10px;
+            margin-left: auto;
+            margin-right: auto;
+            display: block;
+        }
+
+        #orders-history-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px; /* Espacio entre cada tarjeta de pedido */
+        }
+
+        .order-history-card {
+            background-color: var(--background-light); /* Fondo ligeramente gris para la tarjeta de pedido */
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+            cursor: pointer; /* Indica que la tarjeta es clickable */
+        }
+
+        .order-history-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .order-history-summary {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .order-history-summary h3 {
+            margin: 0;
+            font-size: 1.3rem;
+            color: var(--primary-color);
+        }
+
+        .order-history-summary .status {
+            font-weight: bold;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 0.9rem;
+            text-transform: capitalize; /* Primera letra en mayúscula */
+        }
+
+        /* Clases de estado, deben coincidir con los datos que envía el backend */
+        .status.pendiente { background-color: var(--tertiary-color); color: white; }
+        .status.enviado { background-color: var(--primary-color); color: white; }
+        .status.entregado { background-color: var(--success-color); color: white; }
+        .status.cancelado { background-color: var(--danger-color); color: white; }
+
+        .order-history-details p {
+            margin: 5px 0;
+            font-size: 0.95rem;
+            color: var(--text-color-dark);
+        }
+
+        .order-history-total {
+            text-align: right;
+            margin-top: 15px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: var(--success-color);
+            padding-top: 10px;
+            border-top: 1px dashed var(--border-color); /* Línea más suave para el total */
+        }
+
+        #empty-orders-history-message {
+            text-align: center;
+            color: var(--secondary-color);
+            padding: 30px;
+            background-color: var(--background-light);
+            border-radius: var(--border-radius);
+            font-style: italic;
+        }
+
+        .back-button-container {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .back-button {
+            background-color: var(--tertiary-color);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: bold;
+            transition: background-color 0.2s ease-in-out, transform 0.1s ease-in-out;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+        }
+
+        .back-button:hover {
+            background-color: #ec971f;
+            transform: translateY(-2px);
+        }
+
+        /* --- Media Queries para Responsividad --- */
+        @media (max-width: 768px) {
+            header {
+                flex-direction: column;
+                padding: 1rem 15px;
+            }
+            .header-links {
+                margin-top: 10px;
+                gap: 10px;
+            }
+            main {
+                padding: 15px;
+                margin: 15px auto;
+            }
+            h2 {
+                font-size: 1.6rem;
+                margin-bottom: 20px;
+            }
+            .order-history-card {
+                padding: 15px;
+            }
+            .order-history-summary {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 5px;
+            }
+            .order-history-summary h3 {
+                font-size: 1.1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Mi Supermercado</h1>
+        <div class="header-links">
+            <a href="index.html"><i class="fas fa-home"></i> Inicio</a>
+            <a href="catalogo.html"><i class="fas fa-store"></i> Catálogo</a>
+            <a href="historial-pedidos.html"><i class="fas fa-receipt"></i> Mis Pedidos</a>
+            </div>
+    </header>
+
+    <main>
+        <h2>Mi Historial de Pedidos</h2>
+        <div id="orders-history-container">
+            <p id="empty-orders-history-message">Aún no tienes pedidos anteriores.</p>
+            </div>
+
+        <div class="back-button-container">
+            <a href="../index.html" class="back-button">
+            <i class="fas fa-arrow-alt-circle-left"></i> Volver al Menú Principal
+        </a>
+        </div>
+    </main>
+
+    <script src="/js/historial-pedidos.js"></script>
+</body>
+</html>

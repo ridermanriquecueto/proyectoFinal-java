@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Administración - Supermercado</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="/css/style.css"> <style>
+        /* Estilos específicos para admin.html */
+        .admin-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .admin-nav {
+            margin-bottom: 20px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+            display: flex; /* Para que los botones se alineen */
+            gap: 10px; /* Espacio entre los botones de navegación */
+            align-items: center; /* Centrar verticalmente los ítems */
+        }
+        .admin-nav button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.2s ease-in-out;
+        }
+        .admin-nav button:hover {
+            background-color: #0056b3;
+        }
+        .admin-nav button.active { /* Estilo para el botón de navegación activo */
+            background-color: #f0ad4e; /* Naranja para resaltar */
+        }
+
+        .admin-section h2 {
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+            color: #007bff; /* Color azul para los títulos de sección */
+        }
+
+        .product-form {
+            background-color: #e9f7ef;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            border: 1px solid #d4edda;
+        }
+        .product-form label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .product-form input[type="text"],
+        .product-form input[type="number"],
+        .product-form textarea {
+            width: calc(100% - 20px); /* Ajuste para padding */
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box; /* Incluir padding en el ancho */
+        }
+        .product-form button {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.2s ease-in-out;
+        }
+        .product-form button:hover {
+            background-color: #218838;
+        }
+        .product-form button.cancel-btn {
+            background-color: #6c757d;
+            margin-left: 10px;
+        }
+        .product-form button.cancel-btn:hover {
+            background-color: #5a6268;
+        }
+
+
+        .admin-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        .admin-table th, .admin-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+            vertical-align: middle; /* Para alinear contenido de celda, como imágenes */
+        }
+        .admin-table th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+        .admin-table tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        .admin-table tr:hover {
+            background-color: #f1f1f1;
+        }
+
+        .admin-table .actions button {
+            background-color: #ffc107; /* Editar */
+            color: black;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 3px;
+            cursor: pointer;
+            margin-right: 5px;
+            transition: background-color 0.2s ease-in-out;
+            font-size: 0.9em; /* Ajuste para el tamaño del texto del botón */
+        }
+        .admin-table .actions button:hover {
+            background-color: #e0a800;
+        }
+        .admin-table .actions button.delete-btn {
+            background-color: #dc3545; /* Eliminar */
+            color: white;
+        }
+        .admin-table .actions button.delete-btn:hover {
+            background-color: #c82333;
+        }
+
+        .admin-table td img {
+            width: 50px;
+            height: 50px;
+            object-fit: cover;
+            border-radius: 4px;
+        }
+
+        #empty-products-message {
+            text-align: center;
+            color: #6c757d; /* Color secundario para el texto */
+            padding: 20px;
+            background-color: #f8f9fa; /* Fondo claro */
+            border-radius: 8px;
+            font-style: italic;
+            margin-top: 20px;
+            display: none; /* Oculto por defecto, JS lo mostrará */
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        /* Estilos para el botón de "Volver al Menú Principal" en admin.html */
+        .back-to-main-menu-btn {
+            background-color: #6c757d; /* Un gris neutro */
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none; /* Para enlaces */
+            display: inline-flex; /* Para alinear ícono y texto */
+            align-items: center;
+            gap: 5px; /* Espacio entre ícono y texto */
+            transition: background-color 0.2s ease-in-out;
+        }
+        .back-to-main-menu-btn:hover {
+            background-color: #5a6268;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Panel de Administración</h1>
+        <div class="header-links">
+            <a href="index.html"><i class="fas fa-home"></i> Inicio</a>
+            <a href="admin.html"><i class="fas fa-cogs"></i> Administración</a>
+        </div>
+    </header>
+
+    <main class="admin-container">
+        <nav class="admin-nav">
+            <button id="showProductsBtn" class="active">Gestionar Productos</button>
+            <button id="showOrdersBtn">Gestionar Pedidos</button>
+            
+           
+           
+
+        <button class="back-button" onclick="window.location.href='../index.html'">
+            <i class="fas fa-arrow-left"></i> Volver al Menú Principal
+        </button>
+        </nav>
+
+        <section id="products-management" class="admin-section">
+            <h2>Gestión de Productos</h2>
+            <div class="product-form">
+                <h3><span id="form-title">Agregar Nuevo Producto</span></h3>
+                <form id="productForm">
+                    <input type="hidden" id="product-id"> <label for="product-name">Nombre:</label>
+                    <input type="text" id="product-name" required>
+
+                    <label for="product-description">Descripción:</label>
+                    <textarea id="product-description" rows="3"></textarea>
+
+                    <label for="product-price">Precio:</label>
+                    <input type="number" id="product-price" step="0.01" required>
+
+                    <label for="product-stock">Stock:</label>
+                    <input type="number" id="product-stock" required>
+
+                    <label for="product-category">Categoría:</label>
+                    <input type="text" id="product-category">
+
+                    <label for="product-image">URL Imagen:</label>
+                    <input type="text" id="product-image">
+
+                    <button type="submit" id="submit-button"><i class="fas fa-save"></i> Guardar Producto</button>
+                    <button type="button" class="cancel-btn" id="cancel-edit-button" style="display:none;"><i class="fas fa-times-circle"></i> Cancelar Edición</button>
+                </form>
+            </div>
+
+            <p id="empty-products-message">No hay productos registrados. ¡Añade uno nuevo!</p>
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>Imagen</th>
+                        <th>ID</th>
+                        <th>Nombre</th>
+                        <th>Precio</th>
+                        <th>Stock</th>
+                        <th>Categoría</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="products-table-body">
+                    <tr><td colspan="7" style="text-align: center;">Cargando productos...</td></tr>
+                </tbody>
+            </table>
+        </section>
+
+        <section id="orders-management" class="admin-section" style="display:none;">
+            <h2>Gestión de Pedidos</h2>
+            <p>Funcionalidad de gestión de pedidos en desarrollo.</p>
+            </section>
+    </main>
+
+    <script src="/js/admin.js"></script>
+</body>
+</html>
