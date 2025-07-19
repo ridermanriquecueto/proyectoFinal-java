@@ -21,8 +21,7 @@ export function addItemToCart(product, quantity = 1) {
     const existingItemIndex = cart.findIndex(item => item.id === product.id);
 
     if (existingItemIndex > -1) {
-        // Asegúrate de que el stock es un número válido y que no se excede
-        // Si tienes la información del stock total del producto original, aquí podrías validarlo
+       
         cart[existingItemIndex].quantity += quantity;
     } else {
         cart.push({ ...product, quantity: quantity });

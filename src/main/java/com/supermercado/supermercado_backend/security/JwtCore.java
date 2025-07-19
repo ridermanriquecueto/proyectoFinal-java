@@ -1,27 +1,26 @@
-
 package com.supermercado.supermercado_backend.security;
 
 import io.jsonwebtoken.*;
-import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Component; // Importar @Component
 
 import java.security.Key;
 import java.util.Date;
 
-@Component
+@Component // Asegúrate de que esta anotación esté presente
 public class JwtCore {
     private static final Logger logger = LoggerFactory.getLogger(JwtCore.class);
 
-    @Value("${jwt.secret}") // Cargar desde application.properties
+    // Las propiedades se inyectan desde application.properties (usando tus nombres de propiedad)
+    @Value("${jwt.secret}")
     private String jwtSecret;
 
-    @Value("${jwt.expiration.ms}") // Cargar desde application.properties
+    @Value("${jwt.expiration.ms}")
     private long jwtExpirationMs;
 
     public String generateJwtToken(Authentication authentication) {
@@ -35,6 +34,16 @@ public class JwtCore {
                 .compact();
     }
 
+    public String generateTokenFromUsername(String username) {
+        return Jwts.builder()
+                .setSubject(username)
+                .setIssuedAt(new Date())
+                .setExpiration(new Date((new Date()).getTime() + jwtExpirationMs))
+                .signWith(key(), SignatureAlgorithm.HS256)
+                .compact();
+    }
+
+    // Usamos getBytes() para la clave, ya que no está codificada en Base64 en application.properties
     private Key key() {
         return Keys.hmacShaKeyFor(jwtSecret.getBytes());
     }

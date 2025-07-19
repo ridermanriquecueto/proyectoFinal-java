@@ -3,7 +3,6 @@ package com.supermercado.supermercado_backend.models.cart;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-
 import com.supermercado.supermercado_backend.models.productos.Producto;
 
 @Entity
@@ -26,7 +25,7 @@ public class CartItem {
     private Integer quantity;
 
     @Column(nullable = false, precision = 10, scale = 2)
-    private BigDecimal priceAtAddition; // Nombre del campo consistente
+    private BigDecimal priceAtAddition;
 
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
@@ -46,8 +45,6 @@ public class CartItem {
         this.quantity = quantity;
         this.priceAtAddition = priceAtAddition;
     }
-
-    // --- Getters y Setters ---
 
     public Long getId() {
         return id;
@@ -81,7 +78,6 @@ public class CartItem {
         this.quantity = quantity;
     }
 
-    // Getter para priceAtAddition, antes se buscaba getPriceAtAddToCart()
     public BigDecimal getPriceAtAddition() {
         return priceAtAddition;
     }
@@ -107,9 +103,9 @@ public class CartItem {
     }
 
     public BigDecimal getSubtotal() {
-        if (this.priceAtAddition == null || this.quantity == null) {
+        if (priceAtAddition == null || quantity == null) {
             return BigDecimal.ZERO;
         }
-        return this.priceAtAddition.multiply(BigDecimal.valueOf(this.quantity));
+        return priceAtAddition.multiply(BigDecimal.valueOf(quantity));
     }
 }

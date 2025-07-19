@@ -4,11 +4,11 @@ import java.util.List;
 
 public class JwtResponse {
     private String token;
-    private String type = "Bearer"; // Tipo de token JWT
+    private String type = "Bearer"; 
     private Long id;
     private String username;
     private String email;
-    private List<String> roles; // Lista de roles del usuario
+    private List<String> roles; 
 
     public JwtResponse(String accessToken, Long id, String username, String email, List<String> roles) {
         this.token = accessToken;
@@ -18,7 +18,7 @@ public class JwtResponse {
         this.roles = roles;
     }
 
-    // Getters y Setters
+    
     public String getAccessToken() {
         return token;
     }

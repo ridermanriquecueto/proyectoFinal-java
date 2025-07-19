@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Panel de Administración - Supermercado</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <link rel="stylesheet" href="/css/style.css"> <style>
-        /* Estilos específicos para admin.html */
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+    <link rel="stylesheet" href="/css/style.css" />
+    <style>
         .admin-container {
             max-width: 1200px;
             margin: 20px auto;
@@ -15,14 +15,13 @@
             border-radius: 8px;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
-
         .admin-nav {
             margin-bottom: 20px;
             border-bottom: 1px solid #eee;
             padding-bottom: 10px;
-            display: flex; /* Para que los botones se alineen */
-            gap: 10px; /* Espacio entre los botones de navegación */
-            align-items: center; /* Centrar verticalmente los ítems */
+            display: flex;
+            gap: 10px;
+            align-items: center;
         }
         .admin-nav button {
             background-color: #007bff;
@@ -36,17 +35,15 @@
         .admin-nav button:hover {
             background-color: #0056b3;
         }
-        .admin-nav button.active { /* Estilo para el botón de navegación activo */
-            background-color: #f0ad4e; /* Naranja para resaltar */
+        .admin-nav button.active {
+            background-color: #f0ad4e;
         }
-
         .admin-section h2 {
             border-bottom: 2px solid #007bff;
             padding-bottom: 10px;
             margin-bottom: 20px;
-            color: #007bff; /* Color azul para los títulos de sección */
+            color: #007bff;
         }
-
         .product-form {
             background-color: #e9f7ef;
             padding: 20px;
@@ -62,12 +59,12 @@
         .product-form input[type="text"],
         .product-form input[type="number"],
         .product-form textarea {
-            width: calc(100% - 20px); /* Ajuste para padding */
+            width: calc(100% - 20px);
             padding: 10px;
             margin-bottom: 15px;
             border: 1px solid #ccc;
             border-radius: 4px;
-            box-sizing: border-box; /* Incluir padding en el ancho */
+            box-sizing: border-box;
         }
         .product-form button {
             background-color: #28a745;
@@ -88,8 +85,6 @@
         .product-form button.cancel-btn:hover {
             background-color: #5a6268;
         }
-
-
         .admin-table {
             width: 100%;
             border-collapse: collapse;
@@ -99,7 +94,7 @@
             border: 1px solid #ddd;
             padding: 8px;
             text-align: left;
-            vertical-align: middle; /* Para alinear contenido de celda, como imágenes */
+            vertical-align: middle;
         }
         .admin-table th {
             background-color: #f2f2f2;
@@ -111,9 +106,8 @@
         .admin-table tr:hover {
             background-color: #f1f1f1;
         }
-
         .admin-table .actions button {
-            background-color: #ffc107; /* Editar */
+            background-color: #ffc107;
             color: black;
             border: none;
             padding: 5px 10px;
@@ -121,50 +115,46 @@
             cursor: pointer;
             margin-right: 5px;
             transition: background-color 0.2s ease-in-out;
-            font-size: 0.9em; /* Ajuste para el tamaño del texto del botón */
+            font-size: 0.9em;
         }
         .admin-table .actions button:hover {
             background-color: #e0a800;
         }
         .admin-table .actions button.delete-btn {
-            background-color: #dc3545; /* Eliminar */
+            background-color: #dc3545;
             color: white;
         }
         .admin-table .actions button.delete-btn:hover {
             background-color: #c82333;
         }
-
         .admin-table td img {
             width: 50px;
             height: 50px;
             object-fit: cover;
             border-radius: 4px;
         }
-
         #empty-products-message {
             text-align: center;
-            color: #6c757d; /* Color secundario para el texto */
+            color: #6c757d;
             padding: 20px;
-            background-color: #f8f9fa; /* Fondo claro */
+            background-color: #f8f9fa;
             border-radius: 8px;
             font-style: italic;
             margin-top: 20px;
-            display: none; /* Oculto por defecto, JS lo mostrará */
+            display: none;
             box-shadow: 0 1px 3px rgba(0,0,0,0.05);
         }
-
-        /* Estilos para el botón de "Volver al Menú Principal" en admin.html */
         .back-to-main-menu-btn {
-            background-color: #6c757d; /* Un gris neutro */
+            background-color: #6c757d;
             color: white;
             border: none;
             padding: 10px 15px;
             border-radius: 5px;
             cursor: pointer;
-            text-decoration: none; /* Para enlaces */
-            display: inline-flex; /* Para alinear ícono y texto */
+            text-decoration: none;
+            display: inline-flex;
             align-items: center;
-            gap: 5px; /* Espacio entre ícono y texto */
+            gap: 5px;
             transition: background-color 0.2s ease-in-out;
         }
         .back-to-main-menu-btn:hover {
@@ -185,13 +175,9 @@
         <nav class="admin-nav">
             <button id="showProductsBtn" class="active">Gestionar Productos</button>
             <button id="showOrdersBtn">Gestionar Pedidos</button>
-            
-           
-           
-
-        <button class="back-button" onclick="window.location.href='../index.html'">
-            <i class="fas fa-arrow-left"></i> Volver al Menú Principal
-        </button>
+            <button class="back-button" onclick="window.location.href='../index.html'">
+                <i class="fas fa-arrow-left"></i> Volver al Menú Principal
+            </button>
         </nav>
 
         <section id="products-management" class="admin-section">
@@ -199,26 +185,23 @@
             <div class="product-form">
                 <h3><span id="form-title">Agregar Nuevo Producto</span></h3>
                 <form id="productForm">
-                    <input type="hidden" id="product-id"> <label for="product-name">Nombre:</label>
-                    <input type="text" id="product-name" required>
-
+                    <input type="hidden" id="product-id" />
+                    <label for="product-name">Nombre:</label>
+                    <input type="text" id="product-name" required />
                     <label for="product-description">Descripción:</label>
                     <textarea id="product-description" rows="3"></textarea>
-
                     <label for="product-price">Precio:</label>
-                    <input type="number" id="product-price" step="0.01" required>
-
+                    <input type="number" id="product-price" step="0.01" required />
                     <label for="product-stock">Stock:</label>
-                    <input type="number" id="product-stock" required>
-
+                    <input type="number" id="product-stock" required />
                     <label for="product-category">Categoría:</label>
-                    <input type="text" id="product-category">
-
+                    <input type="text" id="product-category" />
                     <label for="product-image">URL Imagen:</label>
-                    <input type="text" id="product-image">
-
+                    <input type="text" id="product-image" />
                     <button type="submit" id="submit-button"><i class="fas fa-save"></i> Guardar Producto</button>
-                    <button type="button" class="cancel-btn" id="cancel-edit-button" style="display:none;"><i class="fas fa-times-circle"></i> Cancelar Edición</button>
+                    <button type="button" class="cancel-btn" id="cancel-edit-button" style="display:none;">
+                        <i class="fas fa-times-circle"></i> Cancelar Edición
+                    </button>
                 </form>
             </div>
 
@@ -244,7 +227,7 @@
         <section id="orders-management" class="admin-section" style="display:none;">
             <h2>Gestión de Pedidos</h2>
             <p>Funcionalidad de gestión de pedidos en desarrollo.</p>
-            </section>
+        </section>
     </main>
 
     <script src="/js/admin.js"></script>

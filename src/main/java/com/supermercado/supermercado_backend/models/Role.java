@@ -1,7 +1,4 @@
-
 package com.supermercado.supermercado_backend.models;
-
-import com.supermercado.supermercado_backend.models.RoleName;
 
 import jakarta.persistence.*;
 
@@ -10,33 +7,32 @@ import jakarta.persistence.*;
 public class Role {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Integer id;
 
     @Enumerated(EnumType.STRING)
     @Column(length = 20)
-    private RoleName name; // Usaremos un enum para los nombres de los roles
+    private ERole name; // Asegúrate de que sea ERole
 
     public Role() {
     }
 
-    public Role(RoleName name) {
+    public Role(ERole name) { // Asegúrate de que sea ERole
         this.name = name;
     }
 
-    // Getters y Setters
-    public Long getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 
-    public RoleName getName() {
+    public ERole getName() { // Asegúrate de que sea ERole
         return name;
     }
 
-    public void setName(RoleName name) {
+    public void setName(ERole name) { // Asegúrate de que sea ERole
         this.name = name;
     }
 }

@@ -2,26 +2,23 @@ package com.supermercado.supermercado_backend.payload.request;
 
 import java.util.Set;
 
-import jakarta.validation.constraints.*; 
-import com.supermercado.supermercado_backend.payload.request.SignupRequest;
+import jakarta.validation.constraints.*; // Mantén esta importación si usas otras validaciones
 
 public class SignupRequest {
     @NotBlank(message = "El nombre de usuario es obligatorio.")
     @Size(min = 3, max = 20, message = "El nombre de usuario debe tener entre 3 y 20 caracteres.")
     private String username;
 
-    @NotBlank(message = "El email es obligatorio.")
-    @Size(max = 50, message = "El email no puede exceder los 50 caracteres.")
-    @Email(message = "Debe ser un formato de email válido.")
-    private String email;
+    // --- ¡CAMBIOS AQUÍ! ---
+    // Eliminamos las anotaciones de validación para hacer el email opcional
+    private String email; // Ahora es opcional
 
-    private Set<String> role; // Puede ser un conjunto de roles como ["admin", "user"]
+    private Set<String> role;
 
     @NotBlank(message = "La contraseña es obligatoria.")
     @Size(min = 6, max = 40, message = "La contraseña debe tener entre 6 y 40 caracteres.")
     private String password;
 
-    // Getters y Setters
     public String getUsername() {
         return username;
     }
@@ -30,6 +27,7 @@ public class SignupRequest {
         this.username = username;
     }
 
+    // --- ¡Mantenemos getters y setters para 'email' si es opcional! ---
     public String getEmail() {
         return email;
     }

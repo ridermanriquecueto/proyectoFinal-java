@@ -1,74 +1,86 @@
-package com.supermercado.supermercado_backend.controllers;
+package com.supermercado.supermercado_backend.controller; // Asumo que tu carpeta es 'controller'
 
-import com.supermercado.supermercado_backend.services.ProductoService;
-import com.supermercado.supermercado_backend.payload.response.MessageResponse; // Import MessageResponse
-import com.supermercado.supermercado_backend.excepciones.RecursoNoEncontradoException; // Import RecursoNoEncontradoException
 import com.supermercado.supermercado_backend.models.productos.Producto;
-
+import com.supermercado.supermercado_backend.services.ProductoService; // Correcto, inyecta la interfaz
+import com.supermercado.supermercado_backend.excepciones.RecursoNoEncontradoException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/productos")
+@CrossOrigin(origins = "http://localhost:8080")
 public class ProductoController {
 
     @Autowired
-    private ProductoService productoService;
+    private ProductoService productoService; // Spring inyectará la implementación (ProductoServiceImpl)
 
-    // Endpoint para obtener todos los productos
+    // Obtener todos los productos
     @GetMapping
-    public ResponseEntity<List<Producto>> obtenerTodosLosProductos() {
-        List<Producto> productos = productoService.obtenerTodosLosProductos(); // <-- CORRECCIÓN AQUÍ
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
+    public ResponseEntity<List<Producto>> getAllProductos() {
+        List<Producto> productos = productoService.obtenerTodosLosProductos();
         return ResponseEntity.ok(productos);
     }
 
-    // Endpoint para obtener un producto por ID
+    // Obtener producto por ID
     @GetMapping("/{id}")
-    public ResponseEntity<Producto> obtenerProductoPorId(@PathVariable Long id) { // <-- ID es Long
-        Producto producto = productoService.obtenerProductoPorId(id); // <-- CORRECCIÓN AQUÍ
-        return ResponseEntity.ok(producto);
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
+    public ResponseEntity<Producto> getProductoById(@PathVariable Long id) {
+        Optional<Producto> producto = productoService.obtenerProductoPorId(id);
+        return producto.map(ResponseEntity::ok)
+                       .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    // Endpoint para crear un nuevo producto (requiere rol de ADMIN)
+    // Nuevo Endpoint para Buscar productos por nombre
+    @GetMapping("/search")
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
+    public ResponseEntity<List<Producto>> searchProductosByName(@RequestParam String name) {
+        List<Producto> productosEncontrados = productoService.buscarProductosPorNombre(name);
+        if (productosEncontrados.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+        return ResponseEntity.ok(productosEncontrados);
+    }
+
+    // Crear un nuevo producto
     @PostMapping
-    @PreAuthorize("hasRole('ADMIN')") // Solo administradores pueden crear productos
-    public ResponseEntity<?> crearProducto(@RequestBody Producto producto) {
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Producto> createProducto(@RequestBody Producto producto) {
         try {
-            Producto nuevoProducto = productoService.guardarProducto(producto); // <-- CORRECCIÓN AQUÍ (metodo guardarProducto)
-            return ResponseEntity.status(201).body(nuevoProducto);
+            Producto newProducto = productoService.guardarProducto(producto);
+            return ResponseEntity.status(HttpStatus.CREATED).body(newProducto);
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(new MessageResponse(e.getMessage()));
+            return ResponseEntity.badRequest().build();
         }
     }
 
-    // Endpoint para actualizar un producto existente (requiere rol de ADMIN)
+    // Actualizar un producto existente
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')") // Solo administradores pueden actualizar productos
-    public ResponseEntity<?> actualizarProducto(@PathVariable Long id, // <-- ID es Long
-                                                @RequestBody Producto detallesProducto) {
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Producto> updateProducto(@PathVariable Long id, @RequestBody Producto producto) {
         try {
-            Producto productoActualizado = productoService.actualizarProducto(id, detallesProducto); // <-- CORRECCIÓN AQUÍ
-            return ResponseEntity.ok(productoActualizado);
+            Producto updatedProducto = productoService.actualizarProducto(id, producto);
+            return ResponseEntity.ok(updatedProducto);
         } catch (RecursoNoEncontradoException e) {
-            return ResponseEntity.status(404).body(new MessageResponse(e.getMessage()));
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(new MessageResponse(e.getMessage()));
+            return ResponseEntity.notFound().build();
         }
     }
 
-    // Endpoint para eliminar un producto (requiere rol de ADMIN)
+    // Eliminar un producto
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')") // Solo administradores pueden eliminar productos
-    public ResponseEntity<?> eliminarProducto(@PathVariable Long id) { // <-- ID es Long
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Void> deleteProducto(@PathVariable Long id) {
         try {
-            productoService.eliminarProducto(id); // <-- CORRECCIÓN AQUÍ
-            return ResponseEntity.ok(new MessageResponse("Producto eliminado con éxito."));
+            productoService.eliminarProducto(id);
+            return ResponseEntity.noContent().build();
         } catch (RecursoNoEncontradoException e) {
-            return ResponseEntity.status(404).body(new MessageResponse(e.getMessage()));
+            return ResponseEntity.notFound().build();
         }
     }
 }

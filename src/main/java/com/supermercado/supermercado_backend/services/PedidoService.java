@@ -1,12 +1,16 @@
 package com.supermercado.supermercado_backend.services;
 
 import com.supermercado.supermercado_backend.excepciones.RecursoNoEncontradoException;
-import com.supermercado.supermercado_backend.models.User; // <<-- ¡VERIFICA ESTA RUTA DE IMPORTACIÓN!
-import com.supermercado.supermercado_backend.models.productos.Producto; // <<-- ¡VERIFICA ESTA RUTA DE IMPORTACIÓN!
+import com.supermercado.supermercado_backend.models.User;
+import com.supermercado.supermercado_backend.models.cart.Cart;
+import com.supermercado.supermercado_backend.models.cart.CartItem; // Importar CartItem
+import com.supermercado.supermercado_backend.models.productos.Producto;
 import com.supermercado.supermercado_backend.pedidos.LineaPedido;
 import com.supermercado.supermercado_backend.pedidos.Pedido;
 import com.supermercado.supermercado_backend.pedidos.PedidoEstado;
-import com.supermercado.supermercado_backend.payload.request.CrearPedidoRequest; // ¡Importante: Nuevo DTO!
+// import com.supermercado.supermercado_backend.payload.request.CrearPedidoRequest; // YA NO NECESITAMOS ESTO PARA CREAR DESDE CARRITO
+import com.supermercado.supermercado_backend.repositories.CartItemRepository;
+import com.supermercado.supermercado_backend.repositories.CartRepository;
 import com.supermercado.supermercado_backend.repositories.LineaPedidoRepository;
 import com.supermercado.supermercado_backend.repositories.PedidoRepository;
 import com.supermercado.supermercado_backend.repositories.ProductoRepository;
@@ -21,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 
 @Service
 public class PedidoService {
@@ -37,84 +42,90 @@ public class PedidoService {
     @Autowired
     private ProductoRepository productoRepository;
 
-    @Transactional // Esto asegura que si algo falla, todos los cambios se deshacen (rollback)
-    public Pedido crearPedido(CrearPedidoRequest crearPedidoRequest) { // <<-- ¡CAMBIO IMPORTANTE EN LOS PARÁMETROS!
-        // 1. Obtener el usuario autenticado (el que está logueado y haciendo el pedido)
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String username = authentication.getName(); // Obtiene el nombre de usuario (ej: "juan.perez")
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new RecursoNoEncontradoException("Usuario autenticado no encontrado: " + username));
+    @Autowired
+    private CartRepository cartRepository;
 
-        // 2. Crear un nuevo objeto Pedido
-        Pedido pedido = new Pedido();
-        pedido.setUser(user); // Asigna el usuario al pedido
-        pedido.setFechaPedido(LocalDateTime.now()); // Establece la fecha y hora actual
-        pedido.setEstado(PedidoEstado.PENDIENTE); // El pedido inicia en estado PENDIENTE
-        pedido.setTotal(BigDecimal.ZERO); // Inicializa el total en cero, se calculará más abajo
+    @Autowired
+    private CartItemRepository cartItemRepository;
 
-        BigDecimal totalDelPedido = BigDecimal.ZERO; // Variable para ir sumando el total
+    @Transactional
+    public Pedido crearPedidoDesdeCarrito(Long userId) {
+        // 1. Obtener el usuario
+        User user = userRepository.findById(userId)
+            .orElseThrow(() -> new RecursoNoEncontradoException("Usuario no encontrado con ID: " + userId));
 
-        // 3. Recorrer cada "ítem" (producto y cantidad) que viene en la solicitud del frontend
-        for (CrearPedidoRequest.ItemPedidoRequest itemRequest : crearPedidoRequest.getItems()) {
-            Long productoId = itemRequest.getProductoId();
-            Integer cantidad = itemRequest.getCantidad();
+        // 2. Obtener el carrito del usuario
+        Cart cart = cartRepository.findByUser(user)
+            .orElseThrow(() -> new RecursoNoEncontradoException("Carrito no encontrado para el usuario: " + user.getUsername()));
 
-            // Validaciones
-            if (cantidad == null || cantidad <= 0) {
-                throw new IllegalArgumentException("La cantidad para el producto con ID " + productoId + " debe ser mayor a cero.");
-            }
-
-            // Buscar el producto en la base de datos
-            Producto producto = productoRepository.findById(productoId)
-                    .orElseThrow(() -> new RecursoNoEncontradoException("Producto no encontrado con ID: " + productoId));
-
-            // Validar stock disponible
-            if (producto.getStock() < cantidad) {
-                throw new IllegalArgumentException("Stock insuficiente para el producto: " + producto.getNombre() + ". Stock disponible: " + producto.getStock());
-            }
-
-            // Obtener el precio actual del producto (usando BigDecimal para precisión en dinero)
-            BigDecimal precioUnitario = producto.getPrecio();
-            
-            // Crear una nueva LineaPedido para este producto
-            LineaPedido linea = new LineaPedido(pedido, producto, cantidad, precioUnitario);
-            // El subtotal de 'linea' se calculará automáticamente debido al método @PrePersist en LineaPedido.java
-
-            // Agregar la línea de pedido al conjunto de líneas del pedido principal
-            pedido.addLineaPedido(linea); 
-            
-            // Sumar el subtotal de esta línea al total general del pedido
-            totalDelPedido = totalDelPedido.add(linea.getSubtotal());
-
-            // Disminuir el stock del producto en la base de datos
-            producto.setStock(producto.getStock() - cantidad);
-            productoRepository.save(producto); // Guarda el producto con el stock actualizado
+        Set<CartItem> cartItems = cart.getCartItems();
+        if (cartItems == null || cartItems.isEmpty()) {
+            throw new IllegalArgumentException("El carrito del usuario está vacío. No se puede crear un pedido.");
         }
 
-        // 4. Asignar el total calculado al pedido principal
-        pedido.setTotal(totalDelPedido);
+        // 3. Crear el nuevo Pedido
+        Pedido pedido = new Pedido();
+        pedido.setUser(user);
+        pedido.setFechaPedido(LocalDateTime.now());
+        pedido.setEstado(PedidoEstado.PENDIENTE);
+        pedido.setTotal(BigDecimal.ZERO);
 
-        // 5. Guardar el Pedido completo en la base de datos.
-        // Gracias a CascadeType.ALL en Pedido.java, las LineaPedido asociadas también se guardarán.
-        return pedidoRepository.save(pedido);
+        BigDecimal totalDelPedido = BigDecimal.ZERO;
+
+        // 4. Procesar cada ítem del carrito para crear Líneas de Pedido
+        for (CartItem cartItem : cartItems) {
+            // --- CAMBIO AQUÍ: USAR getProducto() EN LUGAR DE getProduct() ---
+            Producto producto = cartItem.getProducto(); // <-- CORREGIDO: ahora usa el getter correcto
+            int cantidadEnCarrito = cartItem.getQuantity();
+
+            if (cantidadEnCarrito <= 0) {
+                throw new IllegalArgumentException("Cantidad inválida en el carrito para el producto: " + producto.getNombre());
+            }
+
+            // 4.1. Validar Stock
+            Producto productoActualizado = productoRepository.findById(producto.getId())
+                .orElseThrow(() -> new RecursoNoEncontradoException("Producto no encontrado (ID: " + producto.getId() + ") durante la creación del pedido."));
+
+            if (productoActualizado.getStock() < cantidadEnCarrito) {
+                throw new IllegalArgumentException("Stock insuficiente para el producto: " + productoActualizado.getNombre() + ". Stock disponible: " + productoActualizado.getStock());
+            }
+
+            // 4.2. Crear LineaPedido
+            BigDecimal precioUnitarioAlMomentoDeLaCompra = productoActualizado.getPrecio();
+            LineaPedido linea = new LineaPedido(pedido, productoActualizado, cantidadEnCarrito, precioUnitarioAlMomentoDeLaCompra);
+            pedido.addLineaPedido(linea);
+
+            // También puedes usar linea.getSubtotal() que ya calcula con precioUnitario y cantidad
+            totalDelPedido = totalDelPedido.add(linea.getSubtotal());
+
+            // 4.3. Disminuir el Stock del Producto
+            productoActualizado.setStock(productoActualizado.getStock() - cantidadEnCarrito);
+            productoRepository.save(productoActualizado);
+        }
+
+        // 5. Asignar el total final al pedido
+        pedido.setTotal(totalDelPedido);
+        // 6. Guardar el Pedido (esto también guarda las LineaPedido debido a CascadeType.ALL)
+        Pedido nuevoPedido = pedidoRepository.save(pedido);
+
+        // 7. Vaciar el carrito del usuario
+        cartItemRepository.deleteAll(cartItems);
+
+        return nuevoPedido;
     }
 
-    // --- Métodos de consulta de pedidos ---
-
     @Transactional(readOnly = true)
-    public List<Pedido> obtenerPedidosPorUsuario() { // Obtiene los pedidos del usuario autenticado
+    public List<Pedido> obtenerPedidosPorUsuario() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = authentication.getName();
         User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new RecursoNoEncontradoException("Usuario no encontrado con username: " + username));
+                .orElseThrow(() -> new RecursoNoEncontradoException("Usuario no encontrado: " + username));
         return pedidoRepository.findByUser(user);
     }
 
     @Transactional(readOnly = true)
-    public Pedido obtenerPedidoPorId(Long pedidoId) { // Obtiene un pedido por su ID
+    public Pedido obtenerPedidoPorId(Long pedidoId) {
         return pedidoRepository.findById(pedidoId)
                 .orElseThrow(() -> new RecursoNoEncontradoException("Pedido no encontrado con ID: " + pedidoId));
     }
-
-    // Puedes añadir aquí más métodos si los necesitas, como actualizarEstadoPedido, cancelarPedido, etc.
 }

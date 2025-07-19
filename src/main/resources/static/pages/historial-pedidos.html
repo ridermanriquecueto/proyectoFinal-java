@@ -6,21 +6,20 @@
     <title>Supermercado Online - Mi Historial de Pedidos</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
-        /* Variables CSS (Consistentes en todo el sitio) */
         :root {
-            --primary-color: #007bff; /* Azul vibrante */
-            --secondary-color: #6c757d; /* Gris para botones secundarios / texto suave */
-            --tertiary-color: #f0ad4e; /* Naranja (para volver/otros usos si es necesario) */
-            --success-color: #28a745; /* Verde para éxito/confirmación */
-            --danger-color: #dc3545; /* Rojo para eliminar/alerta */
-            --background-light: #f8f9fa; /* Fondo muy claro */
-            --text-color-dark: #343a40; /* Texto oscuro principal */
-            --card-background: #ffffff; /* Fondo para tarjetas y modal */
-            --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); /* Sombra suave */
+            --primary-color: #007bff;
+            --secondary-color: #6c757d;
+            --tertiary-color: #f0ad4e;
+            --success-color: #28a745;
+            --danger-color: #dc3545;
+            --background-light: #f8f9fa;
+            --text-color-dark: #343a40;
+            --card-background: #ffffff;
+            --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
             --border-radius: 8px;
             --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            --spacing-unit: 15px; /* Unidad base para márgenes/paddings */
-            --border-color: #dee2e6; /* Color de borde para divisores */
+            --spacing-unit: 15px;
+            --border-color: #dee2e6;
         }
 
         body {
@@ -35,7 +34,6 @@
             min-height: 100vh;
         }
 
-        /* --- Header (Consistente) --- */
         header {
             background-color: var(--primary-color);
             color: white;
@@ -73,7 +71,6 @@
             background-color: rgba(255, 255, 255, 0.2);
         }
 
-        /* --- Main Content de Historial de Pedidos --- */
         main {
             flex-grow: 1;
             padding: 20px;
@@ -90,27 +87,26 @@
             margin-bottom: 30px;
             font-size: 2rem;
             border-bottom: 2px solid var(--primary-color);
-            display: inline-block;
+            display: block;
             padding-bottom: 10px;
             margin-left: auto;
             margin-right: auto;
-            display: block;
         }
 
         #orders-history-container {
             display: flex;
             flex-direction: column;
-            gap: 20px; /* Espacio entre cada tarjeta de pedido */
+            gap: 20px;
         }
 
         .order-history-card {
-            background-color: var(--background-light); /* Fondo ligeramente gris para la tarjeta de pedido */
+            background-color: var(--background-light);
             border: 1px solid var(--border-color);
             border-radius: var(--border-radius);
             padding: 20px;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
             transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-            cursor: pointer; /* Indica que la tarjeta es clickable */
+            cursor: pointer;
         }
 
         .order-history-card:hover {
@@ -138,10 +134,9 @@
             padding: 5px 10px;
             border-radius: 5px;
             font-size: 0.9rem;
-            text-transform: capitalize; /* Primera letra en mayúscula */
+            text-transform: capitalize;
         }
 
-        /* Clases de estado, deben coincidir con los datos que envía el backend */
         .status.pendiente { background-color: var(--tertiary-color); color: white; }
         .status.enviado { background-color: var(--primary-color); color: white; }
         .status.entregado { background-color: var(--success-color); color: white; }
@@ -160,7 +155,7 @@
             font-weight: bold;
             color: var(--success-color);
             padding-top: 10px;
-            border-top: 1px dashed var(--border-color); /* Línea más suave para el total */
+            border-top: 1px dashed var(--border-color);
         }
 
         #empty-orders-history-message {
@@ -200,7 +195,6 @@
             transform: translateY(-2px);
         }
 
-        /* --- Media Queries para Responsividad --- */
         @media (max-width: 768px) {
             header {
                 flex-direction: column;
@@ -239,19 +233,19 @@
             <a href="index.html"><i class="fas fa-home"></i> Inicio</a>
             <a href="catalogo.html"><i class="fas fa-store"></i> Catálogo</a>
             <a href="historial-pedidos.html"><i class="fas fa-receipt"></i> Mis Pedidos</a>
-            </div>
+        </div>
     </header>
 
     <main>
         <h2>Mi Historial de Pedidos</h2>
         <div id="orders-history-container">
             <p id="empty-orders-history-message">Aún no tienes pedidos anteriores.</p>
-            </div>
+        </div>
 
         <div class="back-button-container">
             <a href="../index.html" class="back-button">
-            <i class="fas fa-arrow-alt-circle-left"></i> Volver al Menú Principal
-        </a>
+                <i class="fas fa-arrow-alt-circle-left"></i> Volver al Menú Principal
+            </a>
         </div>
     </main>
 

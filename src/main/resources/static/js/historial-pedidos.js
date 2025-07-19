@@ -1,12 +1,9 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // Obtenemos las referencias a los elementos HTML donde mostraremos los pedidos
+    
     const ordersHistoryContainer = document.getElementById('orders-history-container');
     const emptyOrdersHistoryMessage = document.getElementById('empty-orders-history-message');
 
-    /**
-     * Función asíncrona para obtener el historial de pedidos.
-     * En una aplicación real, esto haría una llamada a tu API REST de Spring Boot.
-     */
+   
     async function fetchOrderHistory() {
         // --- INICIO: CÓDIGO PARA CONEXIÓN REAL CON TU BACKEND ---
         // Descomenta y ajusta esta sección cuando tengas tu endpoint RESTful.
@@ -61,31 +58,26 @@ document.addEventListener('DOMContentLoaded', () => {
         // --- FIN: DATOS SIMULADOS ---
     }
 
-    /**
-     * Función para renderizar los pedidos obtenidos en la interfaz de usuario.
-     */
+    
     async function renderOrderHistory() {
-        const orders = await fetchOrderHistory(); // Obtenemos los pedidos
-
-        // Si no hay pedidos, mostramos el mensaje correspondiente
+        const orders = await fetchOrderHistory(); 
         if (orders.length === 0) {
             emptyOrdersHistoryMessage.style.display = 'block';
-            ordersHistoryContainer.innerHTML = ''; // Asegurarse de que no haya nada viejo
+            ordersHistoryContainer.innerHTML = ''; 
             return;
         } else {
-            emptyOrdersHistoryMessage.style.display = 'none'; // Ocultar el mensaje si hay pedidos
+            emptyOrdersHistoryMessage.style.display = 'none'; 
         }
 
-        ordersHistoryContainer.innerHTML = ''; // Limpiamos el contenedor antes de añadir nuevos pedidos
-
-        // Iteramos sobre cada pedido y creamos su tarjeta HTML
+        ordersHistoryContainer.innerHTML = ''; 
+       
         orders.forEach(order => {
             const orderCard = document.createElement('div');
             orderCard.classList.add('order-history-card');
-            // Guardamos el ID del pedido en un atributo de datos para usarlo al hacer clic
+           
             orderCard.setAttribute('data-order-id', order.id); 
 
-            // Construimos el HTML de la tarjeta de pedido
+           
             orderCard.innerHTML = `
                 <div class="order-history-summary">
                     <h3>Pedido #${order.id}</h3>
@@ -100,19 +92,15 @@ document.addEventListener('DOMContentLoaded', () => {
             `;
             ordersHistoryContainer.appendChild(orderCard);
 
-            // Añadimos un evento de clic a cada tarjeta de pedido
-            // Esto permite al usuario ir a la página de detalles del pedido específico.
+         
             orderCard.addEventListener('click', () => {
-                // Redirigimos a pedidos.html pasando el ID del pedido como un parámetro de URL
-                // Tu archivo pedidos.js (el de los detalles de un único pedido)
-                // deberá leer este parámetro 'orderId' para cargar los datos correctos.
+                
                 console.log(`Navegando a detalles del Pedido #${order.id}`);
                 window.location.href = `pedidos.html?orderId=${order.id}`; 
             });
         });
     }
 
-    // Ejecutamos la función para renderizar el historial de pedidos
-    // una vez que todo el DOM de la página ha sido cargado.
+    
     renderOrderHistory();
 });

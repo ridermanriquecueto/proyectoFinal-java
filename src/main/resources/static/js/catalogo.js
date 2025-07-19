@@ -1,6 +1,4 @@
-// src/main/resources/static/js/catalogo.js
 
-// Importa las funciones necesarias desde carrito.js
 import { addItemToCart, getCartTotalItems } from './carrito.js'; 
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -21,7 +19,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Función para actualizar el contador del carrito en el header del catálogo
+   
     function updateCartCounter() {
         const totalItems = getCartTotalItems(); 
         if (cartCountSpan) {
@@ -102,12 +100,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 }, 1); 
 
                 showMessage(`${productName} se agregó al carrito.`);
-                updateCartCounter(); // ¡Actualiza el contador del carrito en el header del catálogo!
+                updateCartCounter(); 
             });
         });
     }
 
-    // --- Inicialización al cargar la página ---
+   
     fetchProducts();
-    updateCartCounter(); // Actualiza el contador del carrito al cargar la página por primera vez
+    updateCartCounter();
 });

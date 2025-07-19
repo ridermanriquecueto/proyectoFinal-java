@@ -1,7 +1,5 @@
-// src/main/resources/static/js/admin.js
-
 document.addEventListener('DOMContentLoaded', () => {
-    // --- Referencias a elementos del formulario de producto ---
+
     const productForm = document.getElementById('productForm');
     const productIdInput = document.getElementById('product-id');
     const productNameInput = document.getElementById('product-name');
@@ -14,37 +12,36 @@ document.addEventListener('DOMContentLoaded', () => {
     const cancelEditButton = document.getElementById('cancel-edit-button');
     const formTitle = document.getElementById('form-title');
 
-    // --- Referencias a elementos de la tabla de productos ---
+    
     const productsTableBody = document.getElementById('products-table-body');
     const emptyProductsMessage = document.getElementById('empty-products-message');
     
-    // --- Elemento para mostrar mensajes de estado ---
+  
     const adminMessage = document.createElement('div');
     adminMessage.id = 'admin-status-message';
     adminMessage.style.cssText = 'padding: 10px; margin-bottom: 20px; border-radius: 5px; text-align: center; display: none;';
-    productForm.before(adminMessage); // Añade el div de mensajes antes del formulario
-
-    // --- Referencias para la navegación entre secciones ---
+    productForm.before(adminMessage); 
     const showProductsBtn = document.getElementById('showProductsBtn');
     const showOrdersBtn = document.getElementById('showOrdersBtn');
     const productsManagementSection = document.getElementById('products-management');
     const ordersManagementSection = document.getElementById('orders-management');
 
-    let editingProductId = null; // Para saber si estamos editando o añadiendo
+   
+    const ordersTableBody = document.getElementById('orders-table-body');
+    const emptyOrdersMessage = document.getElementById('empty-orders-message');
 
-    // --- URL de la API para Productos (Debe coincidir con tu @RequestMapping en ProductoController) ---
+    let editingProductId = null; 
+
+    -
     const API_PRODUCTS_URL = '/api/productos'; 
-
-    // --- Funciones de Utilidad ---
-    /**
-     * Muestra un mensaje de estado al usuario.
-     * @param {string} message - El mensaje a mostrar.
-     * @param {'success' | 'danger' | 'warning' | 'info'} type - Tipo de mensaje para estilos.
-     */
+    const API_ORDERS_URL = '/api/pedidos'; 
+    
+      @param {string} message 
+      @param {'success' | 'danger' | 'warning' | 'info'} type -
+     
     function showStatusMessage(message, type = 'info') {
         adminMessage.textContent = message;
         adminMessage.style.display = 'block';
-        // Estilos básicos según el tipo de mensaje
         if (type === 'success') {
             adminMessage.style.backgroundColor = '#d4edda';
             adminMessage.style.color = '#155724';
@@ -54,16 +51,16 @@ document.addEventListener('DOMContentLoaded', () => {
         } else if (type === 'warning') {
             adminMessage.style.backgroundColor = '#fff3cd';
             adminMessage.style.color = '#856404';
-        } else { // info (por defecto)
+        } else { 
             adminMessage.style.backgroundColor = '#d1ecf1';
             adminMessage.style.color = '#0c5460';
         }
         setTimeout(() => {
             adminMessage.style.display = 'none';
-        }, 5000); // Ocultar después de 5 segundos
+        }, 5000); 
     }
 
-    // Limpia el formulario y resetea el estado de edición
+    
     function resetForm() {
         productForm.reset(); 
         productIdInput.value = ''; 
@@ -74,13 +71,13 @@ document.addEventListener('DOMContentLoaded', () => {
         cancelEditButton.style.display = 'none';
     }
 
-    // --- Lógica de Navegación entre Secciones ---
+    
     showProductsBtn.addEventListener('click', () => {
         productsManagementSection.style.display = 'block';
         ordersManagementSection.style.display = 'none';
         showProductsBtn.classList.add('active');
         showOrdersBtn.classList.remove('active');
-        loadProducts(); // Recarga los productos al cambiar a esta pestaña
+        loadProducts();
     });
 
     showOrdersBtn.addEventListener('click', () => {
@@ -88,17 +85,16 @@ document.addEventListener('DOMContentLoaded', () => {
         ordersManagementSection.style.display = 'block';
         showOrdersBtn.classList.add('active');
         showProductsBtn.classList.remove('active');
-        showStatusMessage('La gestión de pedidos aún está en desarrollo.', 'info');
-        // Aquí podrías llamar a una función para renderizar pedidos si la tuvieras:
-        // renderOrders(); 
+        
+        loadOrders(); 
     });
 
-    // --- Funciones CRUD para Productos (Conexión real con Backend) ---
+   
 
-    /**
-     * Obtiene todos los productos del backend.
-     * @returns {Promise<Array>} Una promesa que resuelve con un array de productos.
-     */
+
+     
+      @returns {Promise<Array>}
+     
     async function fetchProducts() {
         try {
             const response = await fetch(API_PRODUCTS_URL); // Petición GET a /api/productos
@@ -111,13 +107,11 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (error) {
             console.error('Error al obtener productos:', error);
             showStatusMessage(`Error al cargar productos: ${error.message}`, 'danger');
-            return []; // Devuelve un array vacío en caso de error
+            return []; 
         }
     }
 
-    /**
-     * Carga y renderiza los productos en la tabla de administración.
-     */
+   
     async function loadProducts() { 
         productsTableBody.innerHTML = '<tr><td colspan="7" style="text-align: center;">Cargando productos...</td></tr>';
         emptyProductsMessage.style.display = 'none'; 
@@ -136,7 +130,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const row = productsTableBody.insertRow();
             row.setAttribute('data-id', product.id);
             row.innerHTML = `
-                <td><img src="${product.imagenUrl || 'https://via.placeholder.com/60x60?text=No+Img'}" alt="${product.nombre}" onerror="this.onerror=null;this.src='https://via.placeholder.com/60x60?text=No+Img';"></td>
+                <td><img src="${product.imagen || 'https://via.placeholder.com/60x60?text=No+Img'}" alt="${product.nombre}" onerror="this.onerror=null;this.src='https://via.placeholder.com/60x60?text=No+Img';"></td>
                 <td>${product.id}</td>
                 <td>${product.nombre}</td>
                 <td>$${product.precio ? product.precio.toFixed(2) : '0.00'}</td>
@@ -151,7 +145,7 @@ document.addEventListener('DOMContentLoaded', () => {
             `;
         });
 
-        // Añadir listeners para los botones de editar y eliminar
+        
         productsTableBody.querySelectorAll('.edit-btn').forEach(button => {
             button.addEventListener('click', (event) => editProduct(event.currentTarget.dataset.id));
         });
@@ -166,14 +160,14 @@ document.addEventListener('DOMContentLoaded', () => {
     productForm.addEventListener('submit', async (event) => {
         event.preventDefault();
 
-        // Mapeo de los IDs del formulario HTML a los nombres de atributos de la entidad Producto en Java
+        
         const productData = {
             nombre: productNameInput.value,
             descripcion: productDescriptionInput.value,
             precio: parseFloat(productPriceInput.value),
             stock: parseInt(productStockInput.value, 10),
             categoria: productCategoryInput.value,
-            imagenUrl: productImageInput.value
+            imagen: productImageInput.value 
         };
 
         let method = 'POST';
@@ -188,13 +182,13 @@ document.addEventListener('DOMContentLoaded', () => {
             errorMsg = 'Error al actualizar producto.';
         }
 
-        // --- Obtener el token JWT del almacenamiento local ---
-        const token = localStorage.getItem('jwtToken'); 
+        
+        const user = JSON.parse(localStorage.getItem('user')); 
+        const token = user ? user.accessToken : null; 
+        
         if (!token) {
             showStatusMessage('No estás autenticado. Por favor, inicia sesión para realizar esta acción.', 'danger');
-            // Opcional: Podrías redirigir al usuario a la página de login aquí
-            // window.location.href = '/pages/login.html'; 
-            return; // Detiene la ejecución si no hay token
+            return; 
         }
 
         try {
@@ -202,22 +196,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 method: method,
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}` // ¡Aquí se envía el token JWT!
+                    'Authorization': `Bearer ${token}` 
                 },
                 body: JSON.stringify(productData)
             });
 
             if (response.ok) {
-                // const result = await response.json(); // Si tu backend devuelve el objeto guardado
                 showStatusMessage(successMsg, 'success');
                 resetForm();
                 loadProducts();
-            } else if (response.status === 401) {
-                showStatusMessage('No autorizado. Tu sesión puede haber expirado. Por favor, inicia sesión de nuevo.', 'danger');
-                // Opcional: Redirigir a la página de login si la sesión expiró
-                // window.location.href = '/pages/login.html'; 
-            }
-            else {
+            } else if (response.status === 401 || response.status === 403) { 
+                showStatusMessage('No autorizado. Tu sesión puede haber expirado o no tienes permisos (rol ADMIN).', 'danger');
+            } else {
                 const errorText = await response.text();
                 throw new Error(`Error HTTP! Status: ${response.status} - ${errorText}`);
             }
@@ -233,7 +223,7 @@ document.addEventListener('DOMContentLoaded', () => {
      */
     async function editProduct(id) {
         try {
-            const response = await fetch(`${API_PRODUCTS_URL}/${id}`); // Petición GET para obtener un solo producto
+            const response = await fetch(`${API_PRODUCTS_URL}/${id}`); 
             if (!response.ok) {
                 const errorText = await response.text();
                 throw new Error(`Error HTTP! Status: ${response.status} - ${errorText}`);
@@ -246,14 +236,13 @@ document.addEventListener('DOMContentLoaded', () => {
             productPriceInput.value = productToEdit.precio;
             productStockInput.value = productToEdit.stock;
             productCategoryInput.value = productToEdit.categoria || '';
-            productImageInput.value = productToEdit.imagenUrl || '';
-
+            productImageInput.value = productToEdit.imagen || ''; 
             editingProductId = id; 
             formTitle.textContent = 'Editar Producto';
             submitButton.innerHTML = '<i class="fas fa-save"></i> Actualizar Producto';
             submitButton.classList.add('edit-mode');
             cancelEditButton.style.display = 'inline-block';
-            window.scrollTo({ top: 0, behavior: 'smooth' }); // Desplazarse al formulario para editar
+            window.scrollTo({ top: 0, behavior: 'smooth' }); 
         } catch (error) {
             console.error('Error al cargar producto para edición:', error);
             showStatusMessage(`No se pudo cargar el producto para editar: ${error.message}`, 'danger');
@@ -269,12 +258,12 @@ document.addEventListener('DOMContentLoaded', () => {
             return; 
         }
 
-        // --- Obtener el token JWT del almacenamiento local ---
-        const token = localStorage.getItem('jwtToken');
+        
+        const user = JSON.parse(localStorage.getItem('user'));
+        const token = user ? user.accessToken : null; 
+
         if (!token) {
             showStatusMessage('No estás autenticado. Por favor, inicia sesión para realizar esta acción.', 'danger');
-            // Opcional: Redirigir a la página de login
-            // window.location.href = '/pages/login.html'; 
             return; // Detiene la ejecución si no hay token
         }
 
@@ -290,10 +279,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 showStatusMessage('Producto eliminado con éxito!', 'success');
                 loadProducts(); 
                 resetForm(); 
-            } else if (response.status === 401) {
-                showStatusMessage('No autorizado. Tu sesión puede haber expirado. Por favor, inicia sesión de nuevo.', 'danger');
-                // Opcional: Redirigir a la página de login
-                // window.location.href = '/pages/login.html';
+            } else if (response.status === 401 || response.status === 403) {
+                showStatusMessage('No autorizado. Tu sesión puede haber expirado o no tienes permisos (rol ADMIN).', 'danger');
             } else if (response.status === 404) {
                 showStatusMessage('El producto no fue encontrado o ya fue eliminado.', 'warning');
             } else {
@@ -306,9 +293,199 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // --- Listeners de Eventos Iniciales ---
+   
+
+    /**
+     * Obtiene todos los pedidos del backend.
+     * @returns {Promise<Array>} Una promesa que resuelve con un array de pedidos.
+     */
+    async function fetchOrders() {
+        const user = JSON.parse(localStorage.getItem('user'));
+        const token = user ? user.accessToken : null; 
+
+        if (!token) {
+            showStatusMessage('No estás autenticado para ver los pedidos.', 'danger');
+            return [];
+        }
+        try {
+            const response = await fetch(API_ORDERS_URL, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(`Error HTTP! Status: ${response.status} - ${errorText}`);
+            }
+            const orders = await response.json();
+            return orders;
+        } catch (error) {
+            console.error('Error al obtener pedidos:', error);
+            showStatusMessage(`Error al cargar pedidos: ${error.message}`, 'danger');
+            return [];
+        }
+    }
+
+    
+    async function loadOrders() {
+        if (!ordersTableBody) {
+             console.error("Elemento #orders-table-body no encontrado. Asegúrate de que tu HTML tiene la tabla de pedidos.");
+             return;
+        }
+
+        ordersTableBody.innerHTML = '<tr><td colspan="6" style="text-align: center;">Cargando pedidos...</td></tr>';
+        if (emptyOrdersMessage) emptyOrdersMessage.style.display = 'none';
+
+        const orders = await fetchOrders();
+        ordersTableBody.innerHTML = '';
+
+        if (orders.length === 0) {
+            if (emptyOrdersMessage) emptyOrdersMessage.style.display = 'block';
+            return;
+        } else {
+            if (emptyOrdersMessage) emptyOrdersMessage.style.display = 'none';
+        }
+
+        orders.forEach(order => {
+            const row = ordersTableBody.insertRow();
+            row.setAttribute('data-id', order.id);
+            row.innerHTML = `
+                <td>${order.id}</td>
+                <td>${order.username || 'N/A'} (ID: ${order.usuarioId})</td>
+                <td>${new Date(order.fechaCreacion).toLocaleString()}</td>
+                <td>$${order.total ? order.total.toFixed(2) : '0.00'}</td>
+                <td>
+                    <select class="order-status-select form-select" data-id="${order.id}">
+                        <option value="PENDIENTE" ${order.estado === 'PENDIENTE' ? 'selected' : ''}>PENDIENTE</option>
+                        <option value="CONFIRMADO" ${order.estado === 'CONFIRMADO' ? 'selected' : ''}>CONFIRMADO</option>
+                        <option value="ENVIADO" ${order.estado === 'ENVIADO' ? 'selected' : ''}>ENVIADO</option>
+                        <option value="ENTREGADO" ${order.estado === 'ENTREGADO' ? 'selected' : ''}>ENTREGADO</option>
+                        <option value="CANCELADO" ${order.estado === 'CANCELADO' ? 'selected' : ''}>CANCELADO</option>
+                    </select>
+                </td>
+                <td>
+                    <button class="view-details-btn btn btn-info btn-sm" data-id="${order.id}"><i class="fas fa-info-circle"></i> Detalles</button>
+                </td>
+            `;
+        });
+
+        // Añadir listeners para los select de estado
+        ordersTableBody.querySelectorAll('.order-status-select').forEach(select => {
+            select.addEventListener('change', (event) => updateOrderStatus(event.currentTarget.dataset.id, event.currentTarget.value));
+        });
+
+        // Añadir listeners para ver detalles
+        ordersTableBody.querySelectorAll('.view-details-btn').forEach(button => {
+            button.addEventListener('click', (event) => viewOrderDetails(event.currentTarget.dataset.id));
+        });
+    }
+
+    /**
+     * Actualiza el estado de un pedido en el backend.
+     * @param {string} orderId - El ID del pedido a actualizar.
+     * @param {string} newStatus - El nuevo estado (ej: 'ENVIADO').
+     */
+    async function updateOrderStatus(orderId, newStatus) {
+        const user = JSON.parse(localStorage.getItem('user'));
+        const token = user ? user.accessToken : null; 
+
+        if (!token) {
+            showStatusMessage('No estás autenticado para actualizar estados de pedidos.', 'danger');
+            return;
+        }
+
+        try {
+            const response = await fetch(`${API_ORDERS_URL}/${orderId}/estado?estado=${newStatus}`, {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            if (response.ok) {
+                showStatusMessage(`Estado del pedido #${orderId} actualizado a ${newStatus}!`, 'success');
+                // No es necesario recargar loadOrders() aquí si solo cambia el select,
+                // pero si hubiera más lógica de refresco o filtrado, sería útil.
+            } else if (response.status === 401 || response.status === 403) {
+                showStatusMessage('No tienes permiso para actualizar este pedido. Tu sesión puede haber expirado o no tienes el rol adecuado (ADMIN).', 'danger');
+            } else {
+                const errorText = await response.text();
+                throw new Error(`Error HTTP! Status: ${response.status} - ${errorText}`);
+            }
+        } catch (error) {
+            console.error('Error al actualizar estado del pedido:', error);
+            showStatusMessage(`Error al actualizar pedido: ${error.message}`, 'danger');
+        }
+    }
+
+    /**
+     * Muestra los detalles de un pedido específico (usando un modal).
+     * @param {string} orderId - El ID del pedido para mostrar detalles.
+     */
+    async function viewOrderDetails(orderId) {
+        const user = JSON.parse(localStorage.getItem('user'));
+        const token = user ? user.accessToken : null; 
+
+        if (!token) {
+            showStatusMessage('No estás autenticado para ver los detalles del pedido.', 'danger');
+            return;
+        }
+
+        try {
+            const response = await fetch(`${API_ORDERS_URL}/${orderId}`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(`Error HTTP! Status: ${response.status} - ${errorText}`);
+            }
+            const orderDetails = await response.json();
+
+            let detailsHtml = `
+                <h3>Detalles del Pedido #${orderDetails.id}</h3>
+                <p><strong>Usuario:</strong> ${orderDetails.username} (ID: ${orderDetails.usuarioId})</p>
+                <p><strong>Fecha:</strong> ${new Date(orderDetails.fechaCreacion).toLocaleString()}</p>
+                <p><strong>Total:</strong> $${orderDetails.total.toFixed(2)}</p>
+                <p><strong>Estado:</strong> ${orderDetails.estado}</p>
+                <h4>Productos en el Pedido:</h4>
+                <ul class="list-group">
+            `;
+            orderDetails.items.forEach(item => {
+                detailsHtml += `
+                    <li class="list-group-item d-flex align-items-center">
+                        <img src="${item.imageUrlProducto || 'https://via.placeholder.com/30x30?text=No+Img'}" alt="${item.nombreProducto}" class="img-thumbnail me-2" style="width: 30px; height: 30px; object-fit: cover;">
+                        <div>
+                            <strong>${item.nombreProducto}</strong> (x${item.cantidad})<br>
+                            Precio Unitario: $${item.precioUnitario.toFixed(2)} - Subtotal: $${item.subtotal.toFixed(2)}
+                        </div>
+                    </li>
+                `;
+            });
+            detailsHtml += `</ul>`;
+
+            const orderDetailsModalBody = document.getElementById('orderDetailsModalBody');
+            if (orderDetailsModalBody) {
+                orderDetailsModalBody.innerHTML = detailsHtml;
+               
+                const myModal = new bootstrap.Modal(document.getElementById('orderDetailsModal'));
+                myModal.show();
+            } else {
+                alert(`Detalles del Pedido #${orderDetails.id}:\n\n${JSON.stringify(orderDetails, null, 2)}`);
+                console.log('Detalles del pedido:', orderDetails);
+            }
+
+        } catch (error) {
+            console.error('Error al obtener detalles del pedido:', error);
+            showStatusMessage(`No se pudieron cargar los detalles del pedido: ${error.message}`, 'danger');
+        }
+    }
+
+
+  
     cancelEditButton.addEventListener('click', resetForm);
 
-    // Carga inicial: Renderiza los productos al cargar la página (la sección de productos es la predeterminada)
+  
     loadProducts();
 });

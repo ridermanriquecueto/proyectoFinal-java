@@ -1,19 +1,31 @@
-// Ejemplo conceptual de login.js
+// src/main/resources/static/js/login.js
+
 document.addEventListener('DOMContentLoaded', () => {
-    const loginForm = document.getElementById('loginForm'); // Asume que tu formulario tiene id="loginForm"
-    const usernameInput = document.getElementById('username'); // Asume id="username" para el campo usuario
-    const passwordInput = document.getElementById('password'); // Asume id="password" para el campo contraseña
-    const loginMessage = document.getElementById('login-message'); // Un elemento para mostrar mensajes al usuario
+    const loginForm = document.getElementById('loginForm');
+    const usernameInput = document.getElementById('username');
+    const passwordInput = document.getElementById('password');
+    const loginMessage = document.getElementById('login-message');
+    const submitBtn = loginForm.querySelector('button[type="submit"]');
 
     if (loginForm) {
         loginForm.addEventListener('submit', async (event) => {
-            event.preventDefault(); // Evita el envío tradicional del formulario
+            event.preventDefault();
 
-            const username = usernameInput.value;
+            const username = usernameInput.value.trim();
             const password = passwordInput.value;
 
+            if (!username || !password) {
+                loginMessage.textContent = 'Por favor ingresa usuario y contraseña.';
+                loginMessage.style.color = 'red';
+                return;
+            }
+
+            submitBtn.disabled = true;
+            loginMessage.textContent = 'Iniciando sesión...';
+            loginMessage.style.color = 'black';
+
             try {
-                const response = await fetch('/api/auth/signin', { // Asegúrate que esta URL sea la correcta
+                const response = await fetch('/api/auth/signin', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -24,16 +36,22 @@ document.addEventListener('DOMContentLoaded', () => {
                 const data = await response.json();
 
                 if (response.ok) {
-                    // ¡PASO CLAVE! Guardar el token JWT
-                    localStorage.setItem('jwtToken', data.token); // Asume que el backend devuelve un campo 'token'
-                    localStorage.setItem('roles', JSON.stringify(data.roles)); // Opcional: guardar roles
-                    localStorage.setItem('username', data.username); // Opcional: guardar username
-
-                    // Redirigir al usuario al panel de administración
-                    window.location.href = '/pages/admin.html'; // O la ruta correcta a tu admin.html
-
+                    // === ¡CORRECCIÓN FINAL AQUÍ! ===
+                    // Ahora sabemos que el backend envía el token en 'accessToken'.
+                    if (data.accessToken) { // Verificamos que 'accessToken' exista
+                        localStorage.setItem('jwtToken', data.accessToken); // <-- ¡Cambio aquí!
+                        localStorage.setItem('roles', JSON.stringify(data.roles));
+                        localStorage.setItem('username', data.username);
+                        
+                        // Redirige al usuario a la página de productos después del login exitoso.
+                        // Asegúrate de que esta ruta sea correcta para tu proyecto.
+                        window.location.href = '/pages/productos.html';
+                    } else {
+                        // Este mensaje ahora debería ser muy poco probable si el backend responde con 200 OK
+                        loginMessage.textContent = 'Error: No se recibió accessToken del servidor en la respuesta exitosa.';
+                        loginMessage.style.color = 'red';
+                    }
                 } else {
-                    // Manejar errores de autenticación (ej. credenciales inválidas)
                     loginMessage.textContent = data.message || 'Error de autenticación. Verifica tus credenciales.';
                     loginMessage.style.color = 'red';
                 }
@@ -41,6 +59,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 console.error('Error durante el inicio de sesión:', error);
                 loginMessage.textContent = 'Hubo un problema al intentar iniciar sesión. Inténtalo de nuevo.';
                 loginMessage.style.color = 'red';
+            } finally {
+                submitBtn.disabled = false;
             }
         });
     }

@@ -10,7 +10,7 @@ public class LoginRequest {
     @NotBlank(message = "La contraseña no puede estar vacía.")
     private String password;
 
-    // Getters y Setters
+   
     public String getUsername() {
         return username;
     }

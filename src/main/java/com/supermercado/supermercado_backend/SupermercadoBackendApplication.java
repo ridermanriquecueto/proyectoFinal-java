@@ -1,7 +1,7 @@
 package com.supermercado.supermercado_backend;
 
 import com.supermercado.supermercado_backend.models.Role;
-import com.supermercado.supermercado_backend.models.RoleName;
+import com.supermercado.supermercado_backend.models.ERole;
 import com.supermercado.supermercado_backend.models.User;
 import com.supermercado.supermercado_backend.repositories.RoleRepository;
 import com.supermercado.supermercado_backend.repositories.UserRepository;
@@ -9,7 +9,7 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
-import org.springframework.security.crypto.password.PasswordEncoder; // Necesitas esta importación
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -21,34 +21,47 @@ public class SupermercadoBackendApplication {
         SpringApplication.run(SupermercadoBackendApplication.class, args);
     }
 
-    // --- INICIO CÓDIGO PARA CREAR USUARIO DE PRUEBA (¡QUITAR DESPUÉS DE LA PRIMERA EJECUCIÓN!) ---
     @Bean
     CommandLineRunner initData(UserRepository userRepository, RoleRepository roleRepository, PasswordEncoder passwordEncoder) {
         return args -> {
-            // Asegúrate de que los roles existan
-            if (roleRepository.findByName(RoleName.ROLE_USER).isEmpty()) {
-                roleRepository.save(new Role(RoleName.ROLE_USER));
+            // 1. Crear Roles si no existen
+            if (roleRepository.findByName(ERole.ROLE_USER).isEmpty()) {
+                roleRepository.save(new Role(ERole.ROLE_USER));
+                System.out.println("Rol ROLE_USER creado.");
             }
-            if (roleRepository.findByName(RoleName.ROLE_ADMIN).isEmpty()) {
-                roleRepository.save(new Role(RoleName.ROLE_ADMIN));
+            if (roleRepository.findByName(ERole.ROLE_ADMIN).isEmpty()) {
+                roleRepository.save(new Role(ERole.ROLE_ADMIN));
+                System.out.println("Rol ROLE_ADMIN creado.");
             }
-            // Agrega otros roles si los necesitas, ej: ROLE_MODERATOR
+            if (roleRepository.findByName(ERole.ROLE_MODERATOR).isEmpty()) {
+                roleRepository.save(new Role(ERole.ROLE_MODERATOR));
+                System.out.println("Rol ROLE_MODERATOR creado.");
+            }
 
-            // Crea un usuario de prueba si no existe
-            if (userRepository.findByUsername("testuser").isEmpty()) { // Cambié a 'testuser' para evitar conflictos
-                User testUser = new User("testuser", "test@super.com", passwordEncoder.encode("testpassword")); // Usuario: testuser, Contraseña: testpassword
+            // 2. Crear un usuario ADMINISTRADOR "rider" si no existe
+            String adminUsername = "rider";
+            String adminPassword = "123456"; // ¡Recuerda que esto se hashea!
+            String adminEmail = "rider@super.com";
+
+            if (userRepository.findByUsername(adminUsername).isEmpty()) {
+                User adminUser = new User(adminUsername, adminEmail, passwordEncoder.encode(adminPassword));
 
                 Set<Role> roles = new HashSet<>();
-                Role userRole = roleRepository.findByName(RoleName.ROLE_USER)
-                        .orElseThrow(() -> new RuntimeException("Role USER not found."));
-                roles.add(userRole);
-                testUser.setRoles(roles);
-                userRepository.save(testUser);
+                Role adminRole = roleRepository.findByName(ERole.ROLE_ADMIN)
+                        .orElseThrow(() -> new RuntimeException("Error: Rol 'ROLE_ADMIN' no encontrado en la base de datos. ¡Asegúrate de que se cree primero!"));
+                roles.add(adminRole);
+
+                adminUser.setRoles(roles);
+                userRepository.save(adminUser);
+
                 System.out.println("------------------------------------------------------------------");
-                System.out.println("Usuario 'testuser' creado con contraseña 'testpassword'");
+                System.out.println("¡Usuario '" + adminUsername + "' (ADMIN) creado con contraseña '" + adminPassword + "'!");
+                System.out.println("------------------------------------------------------------------");
+            } else {
+                System.out.println("------------------------------------------------------------------");
+                System.out.println("El usuario '" + adminUsername + "' (ADMIN) ya existe. No se creó de nuevo.");
                 System.out.println("------------------------------------------------------------------");
             }
         };
     }
-    // --- FIN CÓDIGO PARA CREAR USUARIO DE PRUEBA ---
 }

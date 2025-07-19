@@ -6,23 +6,22 @@ import java.util.Set;
 
 import com.supermercado.supermercado_backend.models.Role;
 
-
 @Entity
 @Table(name = "users",
-        uniqueConstraints = {
-            @UniqueConstraint(columnNames = "username"),
-            @UniqueConstraint(columnNames = "email") // ¡Añadido! Asegura que el email también sea único
-        })
+       uniqueConstraints = {
+           @UniqueConstraint(columnNames = "username"),
+           @UniqueConstraint(columnNames = "email")
+       })
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private String username;
-    private String password; // ¡Esta será la contraseña encriptada!
+    private String password;
     private String email;
 
-    @ManyToMany(fetch = FetchType.EAGER) // Carga los roles inmediatamente
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "user_roles",
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "role_id"))
@@ -31,14 +30,12 @@ public class User {
     public User() {
     }
 
-    // Constructor corregido para que el orden de los parámetros coincida con AuthController
     public User(String username, String email, String password) {
         this.username = username;
         this.email = email;
         this.password = password;
     }
 
-    // Getters y Setters
     public Long getId() {
         return id;
     }

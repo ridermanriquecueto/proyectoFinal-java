@@ -5,7 +5,6 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
-
 import com.supermercado.supermercado_backend.models.User;
 
 @Entity
@@ -28,8 +27,8 @@ public class Cart {
 
     private LocalDateTime updatedAt;
 
-    @Transient // No se mapea a la base de datos
-    private BigDecimal totalAmount; // Este campo no es necesario si se calcula en el getter
+    @Transient
+    private BigDecimal totalAmount;
 
     public Cart() {
         this.createdAt = LocalDateTime.now();
@@ -39,8 +38,6 @@ public class Cart {
         this.user = user;
         this.createdAt = LocalDateTime.now();
     }
-
-    // --- Getters y Setters ---
 
     public Long getId() {
         return id;
@@ -82,21 +79,17 @@ public class Cart {
         this.updatedAt = updatedAt;
     }
 
-    // Método para calcular el total del carrito
     public BigDecimal getTotalAmount() {
         return cartItems.stream()
-                // CORREGIDO: Usar getPriceAtAddition() de CartItem
                 .map(item -> item.getPriceAtAddition().multiply(BigDecimal.valueOf(item.getQuantity())))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
-    // Método de utilidad para agregar un CartItem
     public void addCartItem(CartItem item) {
         this.cartItems.add(item);
         item.setCart(this);
     }
 
-    // Método de utilidad para remover un CartItem
     public void removeCartItem(CartItem item) {
         this.cartItems.remove(item);
         item.setCart(null);

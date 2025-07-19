@@ -34,10 +34,6 @@ public class CartService {
     @Autowired
     private ProductoRepository productoRepository;
 
-    /**
-     * Helper para obtener el usuario autenticado del contexto de seguridad.
-     * Lanzará una excepción si no hay un usuario autenticado.
-     */
     private User getAuthenticatedUser() {
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         String username;
@@ -50,7 +46,6 @@ public class CartService {
                 .orElseThrow(() -> new RecursoNoEncontradoException("Usuario no encontrado con username: " + username));
     }
 
-    // Este método ya no necesita userId, el usuario se obtiene del contexto
     @Transactional
     public Cart getOrCreateCartForCurrentUser() {
         User user = getAuthenticatedUser();
@@ -58,7 +53,6 @@ public class CartService {
                 .orElseGet(() -> cartRepository.save(new Cart(user)));
     }
 
-    // Método addProductToCart: Firma correcta con productId y quantity
     @Transactional
     public Cart addProductToCart(Long productId, int quantity) {
         if (quantity <= 0) {
@@ -67,14 +61,13 @@ public class CartService {
 
         Cart cart = getOrCreateCartForCurrentUser();
 
-        Producto producto = productoRepository.findById(productId) // Cambiado 'product' a 'producto' por consistencia
+        Producto producto = productoRepository.findById(productId)
                 .orElseThrow(() -> new RecursoNoEncontradoException("Producto no encontrado con ID: " + productId));
 
         if (producto.getStock() < quantity) {
             throw new IllegalArgumentException("Stock insuficiente para el producto: " + producto.getNombre());
         }
 
-        // CAMBIO CLAVE: findByCartAndProduct -> findByCartAndProducto
         Optional<CartItem> existingCartItem = cartItemRepository.findByCartAndProducto(cart, producto);
 
         if (existingCartItem.isPresent()) {
@@ -83,7 +76,6 @@ public class CartService {
             item.setUpdatedAt(LocalDateTime.now());
             cartItemRepository.save(item);
         } else {
-            // Aquí usas getPrecio() y getStock() de Producto, asumo que existen en Producto.java
             CartItem newItem = new CartItem(cart, producto, quantity, producto.getPrecio());
             cart.addCartItem(newItem);
             cartItemRepository.save(newItem);
@@ -93,7 +85,6 @@ public class CartService {
         return cartRepository.save(cart);
     }
 
-    // Método para actualizar la cantidad: Firma correcta con productId y newQuantity
     @Transactional
     public Cart updateProductQuantity(Long productId, int newQuantity) {
         if (newQuantity <= 0) {
@@ -102,10 +93,9 @@ public class CartService {
 
         Cart cart = getOrCreateCartForCurrentUser();
 
-        Producto producto = productoRepository.findById(productId) // Cambiado 'product' a 'producto' por consistencia
+        Producto producto = productoRepository.findById(productId)
                 .orElseThrow(() -> new RecursoNoEncontradoException("Producto no encontrado con ID: " + productId));
 
-        // CAMBIO CLAVE: findByCartAndProduct -> findByCartAndProducto
         CartItem item = cartItemRepository.findByCartAndProducto(cart, producto)
                 .orElseThrow(() -> new RecursoNoEncontradoException("Producto no encontrado en el carrito con ID: " + productId));
 
@@ -122,15 +112,13 @@ public class CartService {
         return cartRepository.save(cart);
     }
 
-    // Método para remover producto: Firma correcta con productId
     @Transactional
     public Cart removeProductFromCart(Long productId) {
         Cart cart = getOrCreateCartForCurrentUser();
 
-        Producto producto = productoRepository.findById(productId) // Cambiado 'product' a 'producto' por consistencia
+        Producto producto = productoRepository.findById(productId)
                 .orElseThrow(() -> new RecursoNoEncontradoException("Producto no encontrado con ID: " + productId));
 
-        // CAMBIO CLAVE: findByCartAndProduct -> findByCartAndProducto
         CartItem item = cartItemRepository.findByCartAndProducto(cart, producto)
                 .orElseThrow(() -> new RecursoNoEncontradoException("Producto no encontrado en el carrito con ID: " + productId));
 
@@ -141,15 +129,12 @@ public class CartService {
         return cartRepository.save(cart);
     }
 
-    // Método para obtener el contenido del carrito del usuario autenticado
     @Transactional(readOnly = true)
     public Cart getCartContentsForCurrentUser() {
         User user = getAuthenticatedUser();
-        return cartRepository.findByUser(user)
-                .orElse(null);
+        return cartRepository.findByUser(user).orElse(null);
     }
 
-    // Método para limpiar el carrito del usuario autenticado
     @Transactional
     public void clearCartForCurrentUser() {
         Cart cart = getOrCreateCartForCurrentUser();

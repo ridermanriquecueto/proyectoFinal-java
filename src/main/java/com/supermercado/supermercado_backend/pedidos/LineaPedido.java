@@ -1,12 +1,11 @@
 package com.supermercado.supermercado_backend.pedidos;
 
+import com.supermercado.supermercado_backend.models.productos.Producto;
 import jakarta.persistence.*;
-import java.math.BigDecimal; 
-
-import com.supermercado.supermercado_backend.models.productos.Producto; // <<-- ¡VERIFICA ESTA RUTA DE IMPORTACIÓN!
+import java.math.BigDecimal;
 
 @Entity
-@Table(name = "lineas_pedido")
+@Table(name = "linea_pedido")
 public class LineaPedido {
 
     @Id
@@ -22,22 +21,18 @@ public class LineaPedido {
     private Producto producto;
 
     @Column(nullable = false)
-    private int cantidad;
+    private Integer cantidad;
 
     @Column(nullable = false, precision = 10, scale = 2)
-    private BigDecimal precioUnitario; 
-
-    @Column(nullable = false, precision = 10, scale = 2)
-    private BigDecimal subtotal; 
+    private BigDecimal precioUnitario;
 
     public LineaPedido() {}
 
-    public LineaPedido(Pedido pedido, Producto producto, int cantidad, BigDecimal precioUnitario) {
+    public LineaPedido(Pedido pedido, Producto producto, Integer cantidad, BigDecimal precioUnitario) {
         this.pedido = pedido;
         this.producto = producto;
         this.cantidad = cantidad;
         this.precioUnitario = precioUnitario;
-        // El subtotal se calculará en el método @PrePersist/@PreUpdate
     }
 
     // Getters y Setters
@@ -50,23 +45,32 @@ public class LineaPedido {
     public Producto getProducto() { return producto; }
     public void setProducto(Producto producto) { this.producto = producto; }
 
-    public int getCantidad() { return cantidad; }
-    public void setCantidad(int cantidad) { this.cantidad = cantidad; }
+    public Integer getCantidad() { return cantidad; }
+    public void setCantidad(Integer cantidad) { this.cantidad = cantidad; }
 
     public BigDecimal getPrecioUnitario() { return precioUnitario; }
     public void setPrecioUnitario(BigDecimal precioUnitario) { this.precioUnitario = precioUnitario; }
 
-    public BigDecimal getSubtotal() { return subtotal; }
-    public void setSubtotal(BigDecimal subtotal) { this.subtotal = subtotal; }
-
-    // Método para calcular subtotal antes de persistir o actualizar
-    @PrePersist
-    @PreUpdate
-    public void calculateSubtotal() {
-        if (this.precioUnitario != null && this.cantidad > 0) {
-            this.subtotal = this.precioUnitario.multiply(BigDecimal.valueOf(this.cantidad));
-        } else {
-            this.subtotal = BigDecimal.ZERO; 
+    // --- ¡AÑADE ESTE MÉTODO! ---
+    public BigDecimal getSubtotal() {
+        // Asegúrate de que ni cantidad ni precioUnitario sean nulos para evitar NullPointerException
+        if (cantidad == null || precioUnitario == null) {
+            return BigDecimal.ZERO; // O lanza una excepción, dependiendo de tu lógica de negocio
         }
+        return precioUnitario.multiply(BigDecimal.valueOf(cantidad));
+    }
+    // ---------------------------
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        LineaPedido that = (LineaPedido) o;
+        return id != null && id.equals(that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
     }
 }

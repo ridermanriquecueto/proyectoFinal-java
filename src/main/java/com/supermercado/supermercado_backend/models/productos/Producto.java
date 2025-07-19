@@ -1,4 +1,3 @@
-
 package com.supermercado.supermercado_backend.models.productos;
 
 import jakarta.persistence.Entity;
@@ -9,17 +8,17 @@ import jakarta.persistence.Column;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
-import java.math.BigDecimal; // Importa BigDecimal
+import java.math.BigDecimal;
 
 @Entity
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
+@Data // De Lombok, para generar getters, setters, etc.
+@NoArgsConstructor // De Lombok, para constructor sin argumentos
+@AllArgsConstructor // De Lombok, para constructor con todos los argumentos
 public class Producto {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id; // <-- Confirmed: This should be 'id' of type Long
+    private Long id; // El ID de Producto es Long (se mapea a BIGINT en MySQL)
 
     @Column(nullable = false, length = 100)
     private String nombre;
@@ -27,8 +26,8 @@ public class Producto {
     @Column(length = 500)
     private String descripcion;
 
-    @Column(nullable = false, precision = 10, scale = 2) // Añade precision y scale para BigDecimal
-    private BigDecimal precio; // <-- Confirmed: This should be BigDecimal
+    @Column(nullable = false, precision = 10, scale = 2)
+    private BigDecimal precio;
 
     @Column(length = 50)
     private String categoria;
