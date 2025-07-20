@@ -1,14 +1,14 @@
+// src/main/java/com/supermercado/supermercado_backend/services/PedidoService.java
 package com.supermercado.supermercado_backend.services;
 
 import com.supermercado.supermercado_backend.excepciones.RecursoNoEncontradoException;
 import com.supermercado.supermercado_backend.models.User;
 import com.supermercado.supermercado_backend.models.cart.Cart;
-import com.supermercado.supermercado_backend.models.cart.CartItem; // Importar CartItem
+import com.supermercado.supermercado_backend.models.cart.CartItem;
 import com.supermercado.supermercado_backend.models.productos.Producto;
 import com.supermercado.supermercado_backend.pedidos.LineaPedido;
 import com.supermercado.supermercado_backend.pedidos.Pedido;
 import com.supermercado.supermercado_backend.pedidos.PedidoEstado;
-// import com.supermercado.supermercado_backend.payload.request.CrearPedidoRequest; // YA NO NECESITAMOS ESTO PARA CREAR DESDE CARRITO
 import com.supermercado.supermercado_backend.repositories.CartItemRepository;
 import com.supermercado.supermercado_backend.repositories.CartRepository;
 import com.supermercado.supermercado_backend.repositories.LineaPedidoRepository;
@@ -50,20 +50,17 @@ public class PedidoService {
 
     @Transactional
     public Pedido crearPedidoDesdeCarrito(Long userId) {
-        // 1. Obtener el usuario
         User user = userRepository.findById(userId)
             .orElseThrow(() -> new RecursoNoEncontradoException("Usuario no encontrado con ID: " + userId));
 
-        // 2. Obtener el carrito del usuario
         Cart cart = cartRepository.findByUser(user)
             .orElseThrow(() -> new RecursoNoEncontradoException("Carrito no encontrado para el usuario: " + user.getUsername()));
 
-        Set<CartItem> cartItems = cart.getCartItems();
+        Set<CartItem> cartItems = cart.getItems();
         if (cartItems == null || cartItems.isEmpty()) {
             throw new IllegalArgumentException("El carrito del usuario está vacío. No se puede crear un pedido.");
         }
 
-        // 3. Crear el nuevo Pedido
         Pedido pedido = new Pedido();
         pedido.setUser(user);
         pedido.setFechaPedido(LocalDateTime.now());
@@ -72,44 +69,38 @@ public class PedidoService {
 
         BigDecimal totalDelPedido = BigDecimal.ZERO;
 
-        // 4. Procesar cada ítem del carrito para crear Líneas de Pedido
         for (CartItem cartItem : cartItems) {
-            // --- CAMBIO AQUÍ: USAR getProducto() EN LUGAR DE getProduct() ---
-            Producto producto = cartItem.getProducto(); // <-- CORREGIDO: ahora usa el getter correcto
+            Producto producto = cartItem.getProduct(); // Correcto: getProduct() de CartItem
             int cantidadEnCarrito = cartItem.getQuantity();
 
             if (cantidadEnCarrito <= 0) {
-                throw new IllegalArgumentException("Cantidad inválida en el carrito para el producto: " + producto.getNombre());
+                throw new IllegalArgumentException("Cantidad inválida en el carrito para el producto: " + producto.getNombre()); // Correcto: getNombre() de Producto
             }
 
-            // 4.1. Validar Stock
-            Producto productoActualizado = productoRepository.findById(producto.getId())
-                .orElseThrow(() -> new RecursoNoEncontradoException("Producto no encontrado (ID: " + producto.getId() + ") durante la creación del pedido."));
+            // Obtener el producto actualizado de la base de datos para asegurar el stock y precio más recientes
+            Producto productoActualizado = productoRepository.findById(producto.getId()) // Correcto: getId() de Producto
+                .orElseThrow(() -> new RecursoNoEncontradoException("Producto no encontrado (ID: " + producto.getId() + ") durante la creación del pedido.")); // Correcto: getId() de Producto
 
-            if (productoActualizado.getStock() < cantidadEnCarrito) {
-                throw new IllegalArgumentException("Stock insuficiente para el producto: " + productoActualizado.getNombre() + ". Stock disponible: " + productoActualizado.getStock());
+            if (productoActualizado.getStock() < cantidadEnCarrito) { // Correcto: getStock() de Producto
+                throw new IllegalArgumentException("Stock insuficiente para el producto: " + productoActualizado.getNombre() + ". Stock disponible: " + productoActualizado.getStock()); // Correcto: getNombre(), getStock() de Producto
             }
 
-            // 4.2. Crear LineaPedido
-            BigDecimal precioUnitarioAlMomentoDeLaCompra = productoActualizado.getPrecio();
+            BigDecimal precioUnitarioAlMomentoDeLaCompra = productoActualizado.getPrecio(); // Correcto: getPrecio() de Producto
             LineaPedido linea = new LineaPedido(pedido, productoActualizado, cantidadEnCarrito, precioUnitarioAlMomentoDeLaCompra);
             pedido.addLineaPedido(linea);
 
-            // También puedes usar linea.getSubtotal() que ya calcula con precioUnitario y cantidad
             totalDelPedido = totalDelPedido.add(linea.getSubtotal());
 
-            // 4.3. Disminuir el Stock del Producto
-            productoActualizado.setStock(productoActualizado.getStock() - cantidadEnCarrito);
+            productoActualizado.setStock(productoActualizado.getStock() - cantidadEnCarrito); // Correcto: getStock() de Producto
             productoRepository.save(productoActualizado);
         }
 
-        // 5. Asignar el total final al pedido
         pedido.setTotal(totalDelPedido);
-        // 6. Guardar el Pedido (esto también guarda las LineaPedido debido a CascadeType.ALL)
         Pedido nuevoPedido = pedidoRepository.save(pedido);
 
-        // 7. Vaciar el carrito del usuario
         cartItemRepository.deleteAll(cartItems);
+        cart.getItems().clear();
+        cartRepository.save(cart);
 
         return nuevoPedido;
     }

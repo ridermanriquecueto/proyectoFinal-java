@@ -1,6 +1,19 @@
 /* src/main/resources/static/css/catalogo.css */
 
-/* --- Configuración base para ocupar toda la pantalla --- */
+/* Variables CSS para una gestión de colores más sencilla (tomadas de productos.css) */
+:root {
+    --bg-dark: #282C34; /* Fondo principal muy oscuro */
+    --bg-medium: #3E4451; /* Fondo para componentes, un poco más claro */
+    --bg-light: #4B5263; /* Fondo para hover, o bordes sutiles */
+    --text-main: #ABB2BF; /* Texto principal gris claro */
+    --text-highlight: #E5C07B; /* Texto resaltado, títulos de tabla, labels importantes */
+    --accent-blue: #61AFEF; /* Azul para acciones primarias, enlaces, bordes de input */
+    --accent-green: #98C379; /* Verde para éxito, agregar */
+    --accent-red: #BE5046; /* Rojo para error, eliminar, cancelar */
+    --shadow-color: rgba(0, 0, 0, 0.6); /* Color de sombra más oscuro */
+    --border-dashed: 1px dashed var(--accent-green); /* Borde punteado principal */
+}
+
 html, body {
     height: 100%;
     margin: 0;
@@ -9,580 +22,276 @@ html, body {
 }
 
 body {
-    font-family: 'Arial', sans-serif; /* Puedes usar var(--font-family) si lo deseas */
-    background-color: var(--background-light); /* Usa tu variable */
-    color: var(--text-color-dark); /* Usa tu variable */
-    display: block; 
+    font-family: 'Arial', sans-serif; /* Puedes ajustar la fuente si tienes una global definida */
+    background-color: var(--bg-dark); /* Fondo principal oscuro */
+    color: var(--text-main);
+    display: flex;
+    flex-direction: column;
     min-height: 100vh;
+    align-items: center; /* Centrar contenido horizontalmente */
+    padding: 20px; /* Padding general para el cuerpo */
 }
 
-/* --- Cabecera principal (AHORA FIJA) --- */
-.main-header {
-    background-color: var(--primary-color); /* Usa tu variable */
-    color: var(--white-color, white);
-    padding: 20px;
+.container {
+    max-width: 1200px; /* Ancho máximo para el contenido */
+    margin: 40px auto;
+    padding: 25px;
+    background-color: var(--bg-dark); /* Fondo del contenedor principal */
+    border-radius: 12px;
+    box-shadow: 0 5px 20px var(--shadow-color);
+    color: var(--text-main);
     text-align: center;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-
-    /* PROPIEDADES PARA HACER EL HEADER FIJO */
-    position: fixed; 
-    width: 100%; 
-    top: 0; 
-    left: 0; 
-    z-index: 1000; 
-
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    flex-wrap: wrap; 
 }
 
-/* NUEVO: Ajuste para el h1 dentro del header */
-.main-header h1 {
-    margin: 0;
-    flex-grow: 1; 
-    text-align: center; 
-    padding: 0 20px; 
-    margin: 0 10px; 
+h1 {
+    color: var(--accent-blue); /* Título principal en azul */
+    font-size: 2.8em;
+    margin-bottom: 15px;
+    text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.4);
 }
 
-/* --- Botón Volver al Menú Principal --- */
-.back-to-menu-btn {
-    position: static;
-    background-color: #0056b3; /* Tono de azul más oscuro */
-    color: var(--white-color, white);
-    padding: 10px 15px;
-    border-radius: 5px;
-    text-decoration: none;
-    font-size: 1em;
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    transition: background-color 0.2s ease;
-    white-space: nowrap; 
-    margin-right: 10px; 
-}
-
-.back-to-menu-btn:hover {
-    background-color: #004085;
-}
-
-.back-to-menu-btn i {
+.intro-text {
     font-size: 1.1em;
+    color: var(--text-main);
+    margin-bottom: 30px;
+    line-height: 1.6;
 }
 
-/* --- Ícono del Carrito (para el modal en el catálogo) --- */
-.cart-icon-container {
-    position: static;
-    cursor: pointer;
-    font-size: 1.8em;
-    display: flex;
-    align-items: center;
-    white-space: nowrap; 
-    margin-left: 10px; 
-    color: var(--white-color, white); /* Para que el icono del carrito sea blanco */
-}
-
-.cart-icon {
-    margin-right: 5px;
-}
-
-.cart-count {
-    background-color: var(--danger-color); /* Usa tu variable de rojo */
-    color: var(--white-color, white);
-    border-radius: 50%;
-    padding: 3px 8px;
-    font-size: 0.7em;
-    position: relative;
-    top: -10px;
-    right: 5px;
-    min-width: 24px;
+.message {
+    padding: 15px 20px;
+    margin: 25px auto;
+    border-radius: 8px;
+    font-weight: bold;
     text-align: center;
+    transition: all 0.4s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    font-size: 1.1em;
+    max-width: 80%;
 }
 
-/* --- Contenido principal (donde se cargan los productos y el carrito.html) --- */
-.main-content {
-    flex-grow: 1;
-    padding: 20px;
-    padding-top: 100px; /* Ajusta este valor si tu header es más alto o más bajo */
-    min-height: calc(100vh - 100px); 
+.message.success {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
 }
 
-/* --- ESTILOS PARA LA PÁGINA DEL CATÁLOGO --- */
-.products-section {
-    padding: 20px;
-    max-width: 1200px;
-    margin: 20px auto;
-    background-color: var(--white-color, white);
-    border-radius: var(--border-radius);
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+.message.error {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
 }
 
-.products-grid {
+.message.warning {
+    background-color: #fff3cd;
+    color: #856404;
+    border: 1px solid #ffeeba;
+}
+
+.message.info {
+    background-color: #d1ecf1;
+    color: #0c5460;
+    border: 1px solid #bee5eb;
+}
+
+/* --- Catálogo de Productos --- */
+.product-grid {
     display: grid;
+    /* Ajustado para favorecer 4 columnas en pantallas grandes */
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); 
-    gap: 25px; 
-    margin-top: 20px;
+    gap: 30px; /* Espacio entre productos */
+    padding: 25px;
+    background-color: var(--bg-medium); /* Fondo más claro para el área del catálogo */
+    border: var(--border-dashed);
+    border-radius: 10px;
+    box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.3);
+    margin-top: 30px;
 }
 
 .product-card {
-    border: 1px solid #ddd;
-    border-radius: 10px; 
-    padding: 15px;
-    text-align: center;
-    background-color: var(--white-color, white);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1); 
+    background-color: var(--bg-dark); /* Fondo oscuro para cada tarjeta de producto */
+    border-radius: 10px;
+    box-shadow: 0 4px 15px var(--shadow-color);
+    overflow: hidden;
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
-    align-items: center;
-    transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out; 
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    text-align: left;
+    color: var(--text-main);
 }
 
 .product-card:hover {
-    transform: translateY(-8px); 
-    box-shadow: 0 8px 16px rgba(0,0,0,0.2); 
+    transform: translateY(-8px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.8);
 }
 
 .product-image {
-    max-width: 100%;
-    height: 180px; 
-    object-fit: contain;
-    margin-bottom: 15px; 
-    border-radius: 8px; 
-    background-color: var(--background-light); /* Usa tu variable */
-    padding: 10px; 
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    border-bottom: 1px solid var(--bg-light);
+}
+
+.product-info {
+    padding: 20px;
+    flex-grow: 1; /* Permite que la información crezca */
+    display: flex;
+    flex-direction: column;
 }
 
 .product-name {
-    font-size: 1.3em; 
+    font-size: 1.5em;
     font-weight: bold;
-    margin-bottom: 8px;
-    min-height: 2.6em; 
-    overflow: hidden;
-    text-overflow: ellipsis;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    color: var(--primary-color); /* Usa tu variable (azul) */
+    color: var(--text-highlight); /* Nombre del producto en amarillo/naranja */
+    margin-bottom: 10px;
+}
+
+.product-description {
+    font-size: 0.9em;
+    color: var(--text-main);
+    margin-bottom: 15px;
+    line-height: 1.5;
+    flex-grow: 1; /* Permite que la descripción ocupe espacio */
 }
 
 .product-price {
-    color: var(--success-color); /* Usa tu variable (verde) */
-    font-size: 1.25em; 
+    font-size: 1.6em;
     font-weight: bold;
-    margin-bottom: 12px;
+    color: var(--accent-green); /* Precio en verde */
+    margin-bottom: 10px;
 }
 
 .product-stock {
-    font-size: 0.95em; 
-    color: var(--secondary-color); /* Usa tu variable (gris) */
-    margin-bottom: 15px; 
+    font-size: 0.9em;
+    color: var(--text-main);
+    margin-bottom: 15px;
+}
+
+.product-stock.low-stock {
+    color: var(--accent-red); /* Si el stock es bajo, en rojo */
+    font-weight: bold;
 }
 
 .add-to-cart-btn {
-    background-color: var(--primary-color); /* Usa tu variable (azul) */
-    color: var(--white-color, white);
+    background-color: var(--accent-blue); /* Azul para el botón de añadir al carrito */
+    color: white;
     border: none;
-    padding: 12px 20px; 
-    border-radius: 8px; 
+    border-radius: 8px;
+    padding: 12px 20px;
     cursor: pointer;
-    font-size: 1.05em; 
-    width: 95%; 
-    margin-top: auto;
-    transition: background-color 0.2s ease-in-out, transform 0.1s ease-in-out;
+    font-size: 1.1em;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+    width: 100%; /* Ocupa todo el ancho de la tarjeta */
+    margin-top: auto; /* Empuja el botón hacia abajo */
+}
+
+.add-to-cart-btn i {
+    font-size: 1.2em;
 }
 
 .add-to-cart-btn:hover {
-    background-color: #0056b3; /* Tono de azul más oscuro */
-    transform: translateY(-2px); 
+    background-color: #4c8dd4; /* Tono más oscuro de azul */
+    transform: translateY(-3px);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.5);
 }
 
-/* --- ESTILOS PARA EL MODAL DEL CARRO (Cuando estás en catalogo.html) --- */
-.modal {
-    display: none;
-    position: fixed;
-    z-index: 1000;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    overflow: auto;
-    background-color: rgba(0,0,0,0.4);
-    padding-top: 60px;
+.add-to-cart-btn:disabled {
+    background-color: #636363; /* Gris oscuro para botones deshabilitados */
+    cursor: not-allowed;
+    opacity: 0.7;
+    box-shadow: none;
 }
 
-.modal-content {
-    background-color: var(--white-color, #d6c5c5);
-    margin: 5% auto;
-    padding: 20px;
-    border: 1px solid #888;
-    width: 90%;
-    max-width: 600px;
-    border-radius: 10px;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-    position: relative;
-}
-
-.close-button {
-    color: #aaa;
-    float: right;
-    font-size: 28px;
-    font-weight: bold;
-    position: absolute;
-    top: 10px;
-    right: 20px;
+/* Botón "Volver al Menú Principal" */
+.back-button {
+    background-color: var(--bg-light); /* Gris más claro para botón de volver */
+    color: white;
+    padding: 12px 25px;
+    border: none;
+    border-radius: 8px;
     cursor: pointer;
-}
-
-.close-button:hover,
-.close-button:focus {
-    color: black;
-    text-decoration: none;
-}
-
-/* REGLAS IMPORTANTES: Estos son los estilos del carrito del modal.
-   Los estilos para la página principal del carrito (abajo) los sobrescribirán
-   siempre y cuando los selectores sean más específicos o el orden de carga sea correcto. */
-.modal .cart-items-container { /* MÁS ESPECÍFICO para el modal */
-    max-height: 300px;
-    overflow-y: auto;
-    margin-bottom: 20px;
-    border: 1px solid #eee;
-    padding: 10px;
-    border-radius: 5px;
-    display: block; /* Vuelve a block para que no afecte el grid de la vista principal */
-    gap: 0; /* Elimina el gap del grid para este */
-}
-
-.modal .cart-item { /* MÁS ESPECÍFICO para el modal */
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px 0;
-    border-bottom: 1px dashed #eee;
-    flex-direction: row; /* Vuelve a fila para el modal */
-    text-align: left; /* Restaura el texto a la izquierda para el modal */
-}
-
-.modal .cart-item:last-child {
-    border-bottom: none;
-}
-
-.modal .cart-item-info {
-    flex-grow: 1;
-    display: flex;
-    align-items: center;
-}
-
-.modal .cart-item-info img {
-    width: 50px;
-    height: 50px;
-    object-fit: cover;
-    margin-right: 10px;
-    border-radius: 4px;
-}
-
-.modal .cart-item-name {
+    font-size: 1.1em;
     font-weight: bold;
-    margin-right: 10px;
-}
-
-.modal .cart-item-price {
-    font-size: 0.9em;
-    color: #555;
-    white-space: nowrap;
-}
-
-.modal .cart-item-actions {
-    display: flex;
+    margin-top: 40px;
+    transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+    display: inline-flex;
     align-items: center;
     gap: 10px;
-    margin-top: 0; /* Restaura el margen */
+    box-shadow: 0 4px 12px var(--shadow-color);
 }
 
-.modal .cart-item-actions button {
-    background-color: #f8f9fa;
-    border: 1px solid #ccc;
-    padding: 5px 10px;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 0.9em;
-}
-
-.modal .cart-item-actions button:hover {
-    background-color: #e2e6ea;
-}
-
-.modal .btn-remove-item {
-    background-color: var(--danger-color) !important; /* Usa tu variable */
-    color: var(--white-color, white) !important;
-    border: none !important;
-}
-.modal .btn-remove-item:hover {
-    background-color: #c82333 !important;
-}
-
-.modal .cart-summary {
-    text-align: right;
-    border-top: 1px solid #eee;
-    padding-top: 15px;
-}
-
-.modal .cart-summary p {
+.back-button i {
     font-size: 1.2em;
-    font-weight: bold;
-    margin-bottom: 15px;
 }
 
-/* --- ESTILOS PARA LA PÁGINA PRINCIPAL DEL CARRO (carrito.html) --- */
-/* Estos estilos usarán selectores específicos (como .cart-page-section)
-   para no entrar en conflicto con los estilos del modal. */
-
-.cart-page-section {
-    width: 90%;
-    max-width: 1000px;
-    margin: 30px auto; 
-    padding: 20px;
-    background-color: var(--white-color, rgb(207, 212, 215)); /* Fondo blanco para la sección del carrito */
-    border-radius: var(--border-radius);
-    box-shadow: var(--card-shadow); /* Usa tu sombra más pronunciada */
+.back-button:hover {
+    background-color: #5c6677; /* Un gris un poco más oscuro al hacer hover */
+    transform: translateY(-3px);
+    box-shadow: 0 6px 15px var(--shadow-color);
 }
 
-/* Contenedor de los ítems individuales del carrito en la página principal */
-.cart-page-section .cart-items-container { /* MÁS ESPECÍFICO */
-    display: grid; /* Usamos CSS Grid para organizar los productos */
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); 
-    gap: 20px; 
-    padding: 15px 0;
-    border-bottom: 1px solid #e5dddd; 
-    margin-bottom: 20px;
-    max-height: unset; /* Elimina la altura máxima del modal */
-    overflow-y: visible; /* Elimina el scroll del modal */
+/* Media Queries para responsividad */
+@media (max-width: 1200px) { /* Para pantallas un poco más pequeñas que el max-width del contenedor */
+    .product-grid {
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); /* Sigue ajustando, pero si el minmax es 250px, cabrán 4 en 1200px */
+    }
 }
 
-/* Estilo para cada tarjeta individual de producto en la página principal */
-.cart-page-section .cart-item { /* MÁS ESPECÍFICO */
-    display: flex; 
-    flex-direction: column; /* Apila imagen, info y acciones */
-    align-items: center; 
-    background-color: var(--background-light); /* Fondo ligeramente gris */
-    border: 1px solid #eee;
-    border-radius: 10px; 
-    padding: 15px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05); 
-    text-align: center;
-    transition: transform 0.2s ease-in-out; 
+@media (max-width: 992px) { /* Para tablets y pantallas medianas */
+    .product-grid {
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); /* Podrían ser 3 columnas */
+        gap: 25px;
+    }
 }
 
-.cart-page-section .cart-item:hover {
-    transform: translateY(-5px); 
-}
-
-.cart-page-section .cart-item-image {
-    width: 100px; 
-    height: 100px;
-    object-fit: cover;
-    border-radius: 8px;
-    margin-bottom: 10px;
-    border: 1px solid #ddd;
-}
-
-.cart-page-section .cart-item-info {
-    flex-grow: 1; 
-    margin-bottom: 10px;
-}
-
-.cart-page-section .cart-item-info h4 {
-    font-size: 1.1em;
-    color: var(--text-color-dark); 
-    margin-bottom: 5px;
-    font-weight: 600;
-}
-
-.cart-page-section .cart-item-info p {
-    font-size: 0.9em;
-    color: var(--secondary-color); 
-    margin: 0;
-}
-
-.cart-page-section .cart-item-actions {
-    display: flex; 
-    align-items: center;
-    gap: 8px; 
-    margin-top: 10px;
-}
-
-.cart-page-section .cart-item-actions .quantity-btn {
-    background-color: var(--secondary-color); 
-    color: var(--white-color, rgb(235, 223, 223));
-    border: none;
-    border-radius: 5px;
-    width: 30px;
-    height: 30px;
-    font-size: 1.2em;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.cart-page-section .cart-item-actions .quantity-btn:hover {
-    background-color: #b7bec3; /* Tono de gris más oscuro */
-}
-
-.cart-page-section .cart-item-actions span {
-    font-size: 1.1em;
-    font-weight: bold;
-    color: var(--text-color-dark);
-    min-width: 25px; 
-    text-align: center;
-}
-
-.cart-page-section .remove-from-cart-btn {
-    background-color: var(--danger-color); 
-    color: var(--white-color, rgb(18, 1, 1));
-    border: none;
-    border-radius: 5px;
-    width: 30px;
-    height: 30px;
-    font-size: 1em;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.cart-page-section .remove-from-cart-btn:hover {
-    background-color: #9f0918; 
-}
-
-/* Estilos para el resumen del carrito (Total y botones) en la página principal */
-.cart-page-summary { /* Nuevo selector para más especificidad */
-    text-align: right; 
-    margin-top: 20px;
-    padding-top: 15px;
-    border-top: 1px solid #eee; 
-}
-
-.cart-page-summary p {
-    font-size: 1.5em;
-    font-weight: bold;
-    color: var(--primary-color); 
-    margin-bottom: 15px;
-}
-
-.cart-page-summary span {
-    color: var(--primary-color); 
-}
-
-.cart-page-summary .cart-buttons {
-    display: flex;
-    flex-wrap: wrap; 
-    justify-content: flex-end; 
-    gap: 10px; 
-}
-
-/* Estilos de botones genéricos, si no los tienes en style.css, añádelos ahí */
-/* Preferiblemente, estos deben estar en style.css */
-.btn {
-    padding: 10px 20px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 1em;
-    margin-left: 10px; /* Margen para los botones en general */
-    transition: background-color 0.2s ease-in-out;
-}
-
-.btn-primary {
-    background-color: var(--success-color); /* Usamos success para "Finalizar Compra" */
-    color: var(--white-color, white);
-}
-
-.btn-primary:hover {
-    background-color: #218838;
-}
-
-.btn-secondary {
-    background-color: var(--secondary-color);
-    color: var(--white-color, white);
-}
-
-.btn-secondary:hover {
-    background-color: #a7b0b6;
-}
-
-
-/* --- Ajustes Responsivos para pantallas pequeñas --- */
 @media (max-width: 768px) {
-    .products-section {
-        padding: 10px;
-        margin: 10px auto;
-    }
-    .main-header {
+    .container {
         padding: 15px;
-        flex-direction: column; 
-        align-items: center;
-        gap: 10px;
-    }
-    .back-to-menu-btn, .cart-icon-container {
-        position: static; 
-        margin-top: 10px;
-    }
-    .cart-count {
-        top: -5px;
-        right: -5px;
-    }
-    .modal-content {
-        width: 95%;
-        margin: 2% auto;
-        padding: 15px;
-    }
-    .modal .cart-item {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 5px;
-    }
-    .modal .cart-item-actions {
-        width: 100%;
-        justify-content: flex-end;
-        margin-top: 5px;
-    }
-    .main-content {
-        padding-top: 130px; 
+        margin: 20px auto;
     }
 
-    /* Media queries específicos para la página del carrito */
-    .cart-page-section .cart-items-container {
-        grid-template-columns: 1fr; /* Una sola columna en pantallas pequeñas */
+    h1 {
+        font-size: 2.2em;
     }
-    .cart-page-summary .cart-buttons {
-        justify-content: center; /* Centra los botones en pantallas pequeñas */
-    }
-    .cart-page-section {
-        margin: 15px;
-        padding: 15px;
-    }
-    .cart-page-summary .btn {
-        width: 100%; /* Botones de acción ocupan todo el ancho en móviles muy pequeños */
-        margin-left: 0; /* Elimina margen izquierdo extra */
-    }
-    .cart-page-summary .cart-buttons {
-        flex-direction: column; /* Apila los botones en columnas */
-    }
-}
 
-@media (max-width: 480px) {
-    .cart-page-section .cart-item-info h4 {
+    .intro-text {
         font-size: 1em;
     }
-    .cart-page-section .cart-item-info p {
-        font-size: 0.8em;
+
+    .product-grid {
+        grid-template-columns: 1fr; /* Una columna en pantallas pequeñas */
+        gap: 20px;
+        padding: 15px;
     }
-    .cart-page-summary p {
-        font-size: 1.2em;
+
+    .product-card {
+        text-align: center;
+    }
+
+    .product-info {
+        padding: 15px;
+    }
+
+    .product-name {
+        font-size: 1.3em;
+    }
+
+    .product-price {
+        font-size: 1.4em;
+    }
+
+    .add-to-cart-btn {
+        font-size: 1em;
+        padding: 10px 15px;
+    }
+
+    .back-button {
+        width: 100%;
+        margin-top: 25px;
+        font-size: 1em;
     }
 }

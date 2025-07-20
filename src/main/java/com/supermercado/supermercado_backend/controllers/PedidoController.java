@@ -1,73 +1,71 @@
-package com.supermercado.supermercado_backend.controllers;
+package com.supermercado.supermercado_backend.controllers; // Asegúrate de que el paquete sea correcto: 'controllers'
 
-import com.supermercado.supermercado_backend.pedidos.Pedido;
-import com.supermercado.supermercado_backend.services.PedidoService;
-// import com.supermercado.supermercado_backend.payload.request.CrearPedidoRequest; // YA NO NECESITAMOS ESTO EN ESTE ENDPOINT
-import com.supermercado.supermercado_backend.payload.response.MessageResponse;
-import com.supermercado.supermercado_backend.security.UserDetailsImpl;
 import com.supermercado.supermercado_backend.excepciones.RecursoNoEncontradoException;
-
+import com.supermercado.supermercado_backend.pedidos.Pedido;
+import com.supermercado.supermercado_backend.security.UserDetailsImpl;
+import com.supermercado.supermercado_backend.services.PedidoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.annotation.AuthenticationPrincipal; // Usaremos esta anotación
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@CrossOrigin(origins = {"null", "http://localhost", "http://127.0.0.1"}, allowCredentials = "true")
 @RestController
 @RequestMapping("/api/pedidos")
-@CrossOrigin(origins = "*", maxAge = 3600)
 public class PedidoController {
 
     @Autowired
     private PedidoService pedidoService;
 
-    // --- ENDPOINT PARA CREAR PEDIDO DESDE EL CARRITO ---
-    // Este endpoint ya no necesita un @RequestBody
-    @PostMapping("/finalizarCompra") // Un nombre más descriptivo
-    @PreAuthorize("hasRole('USER')") // Solo usuarios autenticados
-    public ResponseEntity<?> finalizarCompra(@AuthenticationPrincipal UserDetailsImpl userDetails) {
-        // Obtener el ID del usuario autenticado directamente
-        Long userId = userDetails.getId();
-
+    @PostMapping("/finalizarCompra")
+    @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
+    public ResponseEntity<?> finalizarCompra() {
         try {
-            Pedido nuevoPedido = pedidoService.crearPedidoDesdeCarrito(userId); // Llamamos al nuevo método
-            return new ResponseEntity<>(new MessageResponse("Pedido creado exitosamente. ID: " + nuevoPedido.getId()), HttpStatus.CREATED);
-            // O puedes devolver el objeto Pedido completo si el frontend lo necesita:
-            // return new ResponseEntity<>(nuevoPedido, HttpStatus.CREATED);
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+            Long userId = userDetails.getId();
+
+            Pedido pedido = pedidoService.crearPedidoDesdeCarrito(userId);
+            return ResponseEntity.ok().body("{\"message\": \"Pedido creado exitosamente con ID: " + pedido.getId() + "\"}");
+        } catch (IllegalStateException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
         } catch (IllegalArgumentException e) {
-            // Errores de lógica de negocio como carrito vacío o stock insuficiente
-            return new ResponseEntity<>(new MessageResponse(e.getMessage()), HttpStatus.BAD_REQUEST);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         } catch (RecursoNoEncontradoException e) {
-            // Usuario o carrito no encontrado (aunque con @AuthenticationPrincipal es menos probable para el usuario)
-            return new ResponseEntity<>(new MessageResponse(e.getMessage()), HttpStatus.NOT_FOUND);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         } catch (Exception e) {
-            // Cualquier otro error inesperado
-            return new ResponseEntity<>(new MessageResponse("Error interno del servidor al finalizar la compra: " + e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al finalizar la compra: " + e.getMessage());
         }
     }
 
-    // --- MANTENEMOS TUS OTROS ENDPOINTS ---
-
-    @GetMapping("/me")
-    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
-    public ResponseEntity<List<Pedido>> getPedidosCurrentUser(@AuthenticationPrincipal UserDetailsImpl userDetails) {
-        List<Pedido> pedidos = pedidoService.obtenerPedidosPorUsuario();
-        return new ResponseEntity<>(pedidos, HttpStatus.OK);
+    @GetMapping("/mis-pedidos")
+    @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
+    public ResponseEntity<List<Pedido>> getMisPedidos() {
+        try {
+            List<Pedido> pedidos = pedidoService.obtenerPedidosPorUsuario();
+            return ResponseEntity.ok(pedidos);
+        } catch (RecursoNoEncontradoException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
-    public ResponseEntity<?> obtenerPedidoPorId(@PathVariable Long id) {
+    @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
+    public ResponseEntity<Pedido> getPedidoById(@PathVariable Long id) {
         try {
             Pedido pedido = pedidoService.obtenerPedidoPorId(id);
-            return new ResponseEntity<>(pedido, HttpStatus.OK);
+            return ResponseEntity.ok(pedido);
         } catch (RecursoNoEncontradoException e) {
-            return new ResponseEntity<>(new MessageResponse(e.getMessage()), HttpStatus.NOT_FOUND);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         } catch (Exception e) {
-            return new ResponseEntity<>(new MessageResponse("Error interno del servidor al obtener el pedido: " + e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
 }

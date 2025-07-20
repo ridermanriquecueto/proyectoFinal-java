@@ -64,15 +64,18 @@ public class WebSecurityConfig {
                 // Rutas públicas de API (login, registro, tests)
                 .requestMatchers("/api/auth/**").permitAll()
                 .requestMatchers("/api/test/**").permitAll()
-
+                // Permite acceso a la API de productos sin autenticación
+                .requestMatchers("/api/productos").permitAll() 
+                // Permite acceso a la API de carrito (GET para obtener el carrito)
+                // Esto es importante para que el contador del carrito funcione sin login,
+                // y para que la página del carrito se cargue (aunque esté vacía)
+                .requestMatchers("/api/cart").permitAll() 
+                // Las operaciones de añadir/actualizar/eliminar del carrito seguirán requiriendo autenticación
+                
                 // Rutas públicas de Frontend (recursos estáticos y páginas accesibles sin login)
-                // Permite acceso a la raíz, index, login, y carpetas de recursos estáticos comunes
                 .requestMatchers("/", "/index.html", "/login.html", "/css/**", "/js/**", "/img/**", "/*.ico").permitAll()
-                // === ¡LÍNEA CLAVE AGREGADA/MODIFICADA! ===
-                // Permite acceso a todas las páginas y recursos dentro de la carpeta 'pages'
                 .requestMatchers("/pages/**").permitAll() 
-                // =========================================
-
+                
                 // Cualquier otra petición (APIs protegidas) requiere autenticación
                 .anyRequest().authenticated()
             );

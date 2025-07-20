@@ -1,10 +1,15 @@
+// src/main/java/com/supermercado/supermercado_backend/models/User.java
 package com.supermercado.supermercado_backend.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.supermercado.supermercado_backend.models.cart.Cart;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+
 import java.util.HashSet;
 import java.util.Set;
-
-import com.supermercado.supermercado_backend.models.Role;
 
 @Entity
 @Table(name = "users",
@@ -17,15 +22,28 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotBlank
+    @Size(max = 20)
     private String username;
-    private String password;
+
+    @NotBlank
+    @Size(max = 50)
+    @Email
     private String email;
 
-    @ManyToMany(fetch = FetchType.EAGER)
+    @NotBlank
+    @Size(max = 120)
+    private String password;
+
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "user_roles",
-            joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "role_id"))
+               joinColumns = @JoinColumn(name = "user_id"),
+               inverseJoinColumns = @JoinColumn(name = "role_id"))
     private Set<Role> roles = new HashSet<>();
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    @JsonIgnore // Rompe el ciclo de serialización con Cart
+    private Cart cart;
 
     public User() {
     }
@@ -36,6 +54,7 @@ public class User {
         this.password = password;
     }
 
+    // Getters and Setters (Lombok se encarga de esto con @Data)
     public Long getId() {
         return id;
     }
@@ -52,14 +71,6 @@ public class User {
         this.username = username;
     }
 
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
     public String getEmail() {
         return email;
     }
@@ -68,11 +79,27 @@ public class User {
         this.email = email;
     }
 
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
     public Set<Role> getRoles() {
         return roles;
     }
 
     public void setRoles(Set<Role> roles) {
         this.roles = roles;
+    }
+
+    public Cart getCart() {
+        return cart;
+    }
+
+    public void setCart(Cart cart) {
+        this.cart = cart;
     }
 }

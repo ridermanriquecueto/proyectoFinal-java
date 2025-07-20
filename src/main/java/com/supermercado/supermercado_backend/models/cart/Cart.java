@@ -1,44 +1,34 @@
+// src/main/java/com/supermercado/supermercado_backend/models/cart/Cart.java
 package com.supermercado.supermercado_backend.models.cart;
 
 import jakarta.persistence.*;
+import com.supermercado.supermercado_backend.models.User;
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
-import com.supermercado.supermercado_backend.models.User;
 
 @Entity
 @Table(name = "carts")
 public class Cart {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", referencedColumnName = "id", nullable = false)
+    @JoinColumn(name = "user_id", nullable = false, unique = true)
     private User user;
 
-    @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    private Set<CartItem> cartItems = new HashSet<>();
-
-    @Column(nullable = false)
-    private LocalDateTime createdAt;
-
-    private LocalDateTime updatedAt;
-
-    @Transient
-    private BigDecimal totalAmount;
+    @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<CartItem> items = new HashSet<>();
 
     public Cart() {
-        this.createdAt = LocalDateTime.now();
     }
 
     public Cart(User user) {
         this.user = user;
-        this.createdAt = LocalDateTime.now();
     }
 
+    // --- Getters y Setters ---
     public Long getId() {
         return id;
     }
@@ -55,43 +45,28 @@ public class Cart {
         this.user = user;
     }
 
-    public Set<CartItem> getCartItems() {
-        return cartItems;
+    public Set<CartItem> getItems() { // Este es el método correcto
+        return items;
     }
 
-    public void setCartItems(Set<CartItem> cartItems) {
-        this.cartItems = cartItems;
+    public void setItems(Set<CartItem> items) {
+        this.items = items;
     }
 
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public LocalDateTime getUpdatedAt() {
-        return updatedAt;
-    }
-
-    public void setUpdatedAt(LocalDateTime updatedAt) {
-        this.updatedAt = updatedAt;
-    }
-
-    public BigDecimal getTotalAmount() {
-        return cartItems.stream()
-                .map(item -> item.getPriceAtAddition().multiply(BigDecimal.valueOf(item.getQuantity())))
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-    }
-
-    public void addCartItem(CartItem item) {
-        this.cartItems.add(item);
+    public void addItem(CartItem item) { // Método para añadir un ítem
+        this.items.add(item);
         item.setCart(this);
     }
 
-    public void removeCartItem(CartItem item) {
-        this.cartItems.remove(item);
+    public void removeItem(CartItem item) { // Método para eliminar un ítem
+        this.items.remove(item);
         item.setCart(null);
+    }
+
+    @Transient
+    public BigDecimal getTotal() {
+        return items.stream()
+                .map(item -> item.getPriceAtAddToCart().multiply(BigDecimal.valueOf(item.getQuantity())))
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 }

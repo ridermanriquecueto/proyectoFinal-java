@@ -36,18 +36,22 @@ document.addEventListener('DOMContentLoaded', () => {
                 const data = await response.json();
 
                 if (response.ok) {
-                    // === ¡CORRECCIÓN FINAL AQUÍ! ===
-                    // Ahora sabemos que el backend envía el token en 'accessToken'.
-                    if (data.accessToken) { // Verificamos que 'accessToken' exista
-                        localStorage.setItem('jwtToken', data.accessToken); // <-- ¡Cambio aquí!
+                    if (data.accessToken) {
+                        localStorage.setItem('jwtToken', data.accessToken);
                         localStorage.setItem('roles', JSON.stringify(data.roles));
                         localStorage.setItem('username', data.username);
                         
-                        // Redirige al usuario a la página de productos después del login exitoso.
-                        // Asegúrate de que esta ruta sea correcta para tu proyecto.
-                        window.location.href = '/pages/productos.html';
+                        // Lógica de redirección mejorada: va a la URL guardada o al catálogo por defecto
+                        const redirectUrl = sessionStorage.getItem('redirectAfterLogin');
+                        if (redirectUrl) {
+                            sessionStorage.removeItem('redirectAfterLogin'); // Limpiar después de usar
+                            window.location.href = redirectUrl; // Redirigir a la URL guardada
+                        } else {
+                            // Si no hay URL guardada, redirigir al catálogo por defecto
+                            window.location.href = '/pages/catalogo.html'; 
+                        }
+
                     } else {
-                        // Este mensaje ahora debería ser muy poco probable si el backend responde con 200 OK
                         loginMessage.textContent = 'Error: No se recibió accessToken del servidor en la respuesta exitosa.';
                         loginMessage.style.color = 'red';
                     }

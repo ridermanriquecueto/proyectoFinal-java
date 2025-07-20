@@ -1,51 +1,44 @@
+// src/main/java/com/supermercado/supermercado_backend/models/cart/CartItem.java
 package com.supermercado.supermercado_backend.models.cart;
 
 import jakarta.persistence.*;
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import com.supermercado.supermercado_backend.models.productos.Producto;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import java.math.BigDecimal;
 
 @Entity
 @Table(name = "cart_items")
 public class CartItem {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "cart_id", nullable = false)
+    @JsonIgnore // Rompe el ciclo de serialización con Cart
     private Cart cart;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id", nullable = false)
-    private Producto producto;
+    private Producto product; // Nombre de variable 'product' para consistencia
 
     @Column(nullable = false)
     private Integer quantity;
 
     @Column(nullable = false, precision = 10, scale = 2)
-    private BigDecimal priceAtAddition;
-
-    @Column(nullable = false, updatable = false)
-    private LocalDateTime createdAt;
-
-    @Column(nullable = false)
-    private LocalDateTime updatedAt;
+    private BigDecimal priceAtAddToCart;
 
     public CartItem() {
-        this.createdAt = LocalDateTime.now();
-        this.updatedAt = LocalDateTime.now();
     }
 
-    public CartItem(Cart cart, Producto producto, Integer quantity, BigDecimal priceAtAddition) {
-        this();
+    public CartItem(Cart cart, Producto product, Integer quantity, BigDecimal priceAtAddToCart) {
         this.cart = cart;
-        this.producto = producto;
+        this.product = product;
         this.quantity = quantity;
-        this.priceAtAddition = priceAtAddition;
+        this.priceAtAddToCart = priceAtAddToCart;
     }
 
+    // --- Getters y Setters ---
     public Long getId() {
         return id;
     }
@@ -62,12 +55,14 @@ public class CartItem {
         this.cart = cart;
     }
 
-    public Producto getProducto() {
-        return producto;
+    // Asegúrate de que el getter sea getProduct()
+    public Producto getProduct() { 
+        return product;
     }
 
-    public void setProducto(Producto producto) {
-        this.producto = producto;
+    // Asegúrate de que el setter sea setProduct()
+    public void setProduct(Producto product) { 
+        this.product = product;
     }
 
     public Integer getQuantity() {
@@ -78,34 +73,11 @@ public class CartItem {
         this.quantity = quantity;
     }
 
-    public BigDecimal getPriceAtAddition() {
-        return priceAtAddition;
+    public BigDecimal getPriceAtAddToCart() {
+        return priceAtAddToCart;
     }
 
-    public void setPriceAtAddition(BigDecimal priceAtAddition) {
-        this.priceAtAddition = priceAtAddition;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public LocalDateTime getUpdatedAt() {
-        return updatedAt;
-    }
-
-    public void setUpdatedAt(LocalDateTime updatedAt) {
-        this.updatedAt = updatedAt;
-    }
-
-    public BigDecimal getSubtotal() {
-        if (priceAtAddition == null || quantity == null) {
-            return BigDecimal.ZERO;
-        }
-        return priceAtAddition.multiply(BigDecimal.valueOf(quantity));
+    public void setPriceAtAddToCart(BigDecimal priceAtAddToCart) {
+        this.priceAtAddToCart = priceAtAddToCart;
     }
 }

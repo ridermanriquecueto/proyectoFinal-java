@@ -4,23 +4,28 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Catálogo de Productos - Supermercado</title>
-    <link rel="stylesheet" href="../css/style.css"> 
-    <link rel="stylesheet" href="../css/catalogo.css"> 
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/catalogo.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
     <header class="main-header">
-        <a href="../index.html" class="back-to-menu-btn">
+        <!-- Botón para volver al menú principal -->
+        <a href="../index.html" class="back-to-menu-btn" id="back-to-menu-button">
             <i class="fas fa-arrow-left"></i> Volver al Menú Principal
         </a>
         <h1>Bienvenido a nuestro Catálogo</h1>
-        <a href="carrito.html" class="cart-link-container">
+        <!-- Contenedor del icono del carrito y contador -->
+        <a href="carrito.html" class="cart-link-container" id="cart-button">
             <i class="fas fa-shopping-cart cart-icon" id="cart-icon-catalog"></i>
             <span class="cart-count" id="cart-count-catalog">0</span>
         </a>
     </header>
 
     <main class="main-content">
+        <!-- Contenedor para mensajes al usuario -->
+        <div id="message" class="message" style="display: none;"></div>
+
         <section class="products-section">
             <h2>Nuestros Productos Frescos</h2>
             <div class="products-grid" id="products-container">
@@ -29,7 +34,8 @@
         </section>
     </main>
 
-    <script type="module" src="../js/carrito.js"></script>
-    <script type="module" src="../js/catalogo.js"></script> 
+    <!-- Importar catalogo.js como módulo -->
+    <script type="module" src="../js/catalogo.js"></script>
+    <!-- carrito.js NO se importa aquí, solo en carrito.html -->
 </body>
 </html>

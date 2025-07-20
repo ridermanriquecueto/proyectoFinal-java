@@ -1,6 +1,6 @@
+// src/main/java/com/supermercado/supermercado_backend/services/CartService.java
 package com.supermercado.supermercado_backend.services;
 
-import com.supermercado.supermercado_backend.excepciones.RecursoNoEncontradoException;
 import com.supermercado.supermercado_backend.models.cart.Cart;
 import com.supermercado.supermercado_backend.models.cart.CartItem;
 import com.supermercado.supermercado_backend.models.productos.Producto;
@@ -8,15 +8,11 @@ import com.supermercado.supermercado_backend.models.User;
 import com.supermercado.supermercado_backend.repositories.CartItemRepository;
 import com.supermercado.supermercado_backend.repositories.CartRepository;
 import com.supermercado.supermercado_backend.repositories.ProductoRepository;
-import com.supermercado.supermercado_backend.repositories.UserRepository;
-
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
+import java.math.BigDecimal;
 import java.util.Optional;
 
 @Service
@@ -29,121 +25,93 @@ public class CartService {
     private CartItemRepository cartItemRepository;
 
     @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
     private ProductoRepository productoRepository;
 
-    private User getAuthenticatedUser() {
-        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        String username;
-        if (principal instanceof UserDetails) {
-            username = ((UserDetails) principal).getUsername();
-        } else {
-            username = principal.toString();
-        }
-        return userRepository.findByUsername(username)
-                .orElseThrow(() -> new RecursoNoEncontradoException("Usuario no encontrado con username: " + username));
-    }
-
     @Transactional
-    public Cart getOrCreateCartForCurrentUser() {
-        User user = getAuthenticatedUser();
+    public Cart getOrCreateCart(User user) {
         return cartRepository.findByUser(user)
-                .orElseGet(() -> cartRepository.save(new Cart(user)));
+                .orElseGet(() -> {
+                    Cart newCart = new Cart(user);
+                    return cartRepository.save(newCart);
+                });
     }
 
     @Transactional
-    public Cart addProductToCart(Long productId, int quantity) {
+    public CartItem addProductToCart(User user, Long productId, int quantity) {
         if (quantity <= 0) {
             throw new IllegalArgumentException("La cantidad debe ser mayor que cero.");
         }
 
-        Cart cart = getOrCreateCartForCurrentUser();
+        Cart cart = getOrCreateCart(user);
 
-        Producto producto = productoRepository.findById(productId)
-                .orElseThrow(() -> new RecursoNoEncontradoException("Producto no encontrado con ID: " + productId));
+        Producto product = productoRepository.findById(productId)
+                .orElseThrow(() -> new RuntimeException("Producto no encontrado con ID: " + productId));
 
-        if (producto.getStock() < quantity) {
-            throw new IllegalArgumentException("Stock insuficiente para el producto: " + producto.getNombre());
+        if (product.getStock() < quantity) {
+            throw new IllegalArgumentException("No hay suficiente stock para el producto " + product.getNombre() + ". Stock disponible: " + product.getStock());
         }
 
-        Optional<CartItem> existingCartItem = cartItemRepository.findByCartAndProducto(cart, producto);
+        Optional<CartItem> existingCartItem = cartItemRepository.findByCartAndProduct(cart, product);
 
+        CartItem cartItem;
         if (existingCartItem.isPresent()) {
-            CartItem item = existingCartItem.get();
-            item.setQuantity(item.getQuantity() + quantity);
-            item.setUpdatedAt(LocalDateTime.now());
-            cartItemRepository.save(item);
+            cartItem = existingCartItem.get();
+            cartItem.setQuantity(cartItem.getQuantity() + quantity);
         } else {
-            CartItem newItem = new CartItem(cart, producto, quantity, producto.getPrecio());
-            cart.addCartItem(newItem);
-            cartItemRepository.save(newItem);
+            cartItem = new CartItem(cart, product, quantity, product.getPrecio());
+            cart.addItem(cartItem);
         }
-
-        cart.setUpdatedAt(LocalDateTime.now());
-        return cartRepository.save(cart);
+        cartRepository.save(cart);
+        return cartItemRepository.save(cartItem);
     }
 
     @Transactional
-    public Cart updateProductQuantity(Long productId, int newQuantity) {
+    public CartItem updateProductQuantity(User user, Long productId, int newQuantity) {
+        Cart cart = getOrCreateCart(user);
+        Producto product = productoRepository.findById(productId)
+                .orElseThrow(() -> new RuntimeException("Producto no encontrado con ID: " + productId));
+
+        CartItem cartItem = cartItemRepository.findByCartAndProduct(cart, product)
+                .orElseThrow(() -> new RuntimeException("Producto no encontrado en el carrito."));
+
+        if (newQuantity > 0 && product.getStock() < newQuantity) {
+            throw new IllegalArgumentException("No hay suficiente stock para el producto " + product.getNombre() + ". Stock disponible: " + product.getStock());
+        }
+
         if (newQuantity <= 0) {
-            return removeProductFromCart(productId);
+            removeProductFromCart(user, productId);
+            return null;
+        } else {
+            cartItem.setQuantity(newQuantity);
+            cartRepository.save(cart);
+            return cartItemRepository.save(cartItem);
         }
-
-        Cart cart = getOrCreateCartForCurrentUser();
-
-        Producto producto = productoRepository.findById(productId)
-                .orElseThrow(() -> new RecursoNoEncontradoException("Producto no encontrado con ID: " + productId));
-
-        CartItem item = cartItemRepository.findByCartAndProducto(cart, producto)
-                .orElseThrow(() -> new RecursoNoEncontradoException("Producto no encontrado en el carrito con ID: " + productId));
-
-        if (producto.getStock() < newQuantity) {
-            throw new IllegalArgumentException("Stock insuficiente para el producto: " + producto.getNombre() +
-                    " (Disponible: " + producto.getStock() + ")");
-        }
-
-        item.setQuantity(newQuantity);
-        item.setUpdatedAt(LocalDateTime.now());
-        cartItemRepository.save(item);
-
-        cart.setUpdatedAt(LocalDateTime.now());
-        return cartRepository.save(cart);
     }
 
     @Transactional
-    public Cart removeProductFromCart(Long productId) {
-        Cart cart = getOrCreateCartForCurrentUser();
+    public void removeProductFromCart(User user, Long productId) {
+        Cart cart = getOrCreateCart(user);
+        Producto product = productoRepository.findById(productId)
+                .orElseThrow(() -> new RuntimeException("Producto no encontrado con ID: " + productId));
 
-        Producto producto = productoRepository.findById(productId)
-                .orElseThrow(() -> new RecursoNoEncontradoException("Producto no encontrado con ID: " + productId));
+        CartItem cartItem = cartItemRepository.findByCartAndProduct(cart, product)
+                .orElseThrow(() -> new RuntimeException("Producto no encontrado en el carrito."));
 
-        CartItem item = cartItemRepository.findByCartAndProducto(cart, producto)
-                .orElseThrow(() -> new RecursoNoEncontradoException("Producto no encontrado en el carrito con ID: " + productId));
+        cart.removeItem(cartItem);
+        cartItemRepository.delete(cartItem);
+        cartRepository.save(cart);
+    }
 
-        cart.removeCartItem(item);
-        cartItemRepository.delete(item);
-
-        cart.setUpdatedAt(LocalDateTime.now());
-        return cartRepository.save(cart);
+    @Transactional
+    public void clearCart(User user) {
+        Cart cart = getOrCreateCart(user);
+        cartItemRepository.deleteAll(cart.getItems());
+        cart.getItems().clear();
+        cartRepository.save(cart);
     }
 
     @Transactional(readOnly = true)
-    public Cart getCartContentsForCurrentUser() {
-        User user = getAuthenticatedUser();
-        return cartRepository.findByUser(user).orElse(null);
-    }
-
-    @Transactional
-    public void clearCartForCurrentUser() {
-        Cart cart = getOrCreateCartForCurrentUser();
-
-        if (!cart.getCartItems().isEmpty()) {
-            cartItemRepository.deleteAll(cart.getCartItems());
-            cart.getCartItems().clear();
-            cart.setUpdatedAt(LocalDateTime.now());
-            cartRepository.save(cart);
-        }
+    public Optional<Cart> getCartByUser(User user) {
+        return cartRepository.findByUser(user);
     }
 }
